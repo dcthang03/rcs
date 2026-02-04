@@ -265,7 +265,7 @@ renderSeats()
 loadSeats()
 window.addEventListener('resize', renderSeats)
 
-/* ===== module quét QR (OPTIMIZED – SAFE) ===== */
+/* ===== module quét QR */
 
 let qrScanner = null
 
@@ -274,55 +274,37 @@ function scanQRAndAssign(seatIndex) {
   const closeBtn = document.getElementById('closeQR')
   modal.style.display = 'flex'
 
-  // ♻️ reuse scanner – không tạo mới mỗi lần
-  if (!qrScanner) {
-    qrScanner = new Html5Qrcode('qr-reader')
-  }
+  qrScanner = new Html5Qrcode('qr-reader')
 
   qrScanner.start(
-    {
-      facingMode: "environment",
-      width: { ideal: 640 },   // 🔥 giảm resolution → focus nhanh hơn
-      height: { ideal: 480 }
-    },
-    {
-      fps: 15,                // 🔥 tăng fps → bắt QR nhanh hơn
-      qrbox: { width: 220, height: 220 }, // 🔥 khung vuông rõ ràng
-      aspectRatio: 1.0        // 🔥 Safari ổn định hơn
-    },
-
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: 200 },
+  
     (decodedText) => {
-      qrScanner.stop().then(() => {
-  qrScanner.clear()   // 🔥 giải phóng camera stream
-})
+  qrScanner.stop()
+  modal.style.display = 'none'
 
-if (!qrScanner) {
-  qrScanner = new Html5Qrcode('qr-reader')
+  if (!decodedText) return
+
+  // 👉 chỉ giữ chữ + số
+  const uid = decodedText
+    .trim()
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+
+  if (!uid) {
+    alert('QR không hợp lệ')
+    return
+  }
+
+  assignUID(seatIndex, uid)
 }
 
 
-
-      modal.style.display = 'none'
-
-      if (!decodedText) return
-
-      // 👉 chỉ giữ chữ + số
-      const uid = decodedText
-        .trim()
-        .replace(/[^a-zA-Z0-9]/g, '')
-        .toUpperCase()
-
-      if (!uid) {
-        alert('QR không hợp lệ')
-        return
-      }
-
-      assignUID(seatIndex, uid)
-    }
   )
 
   closeBtn.onclick = () => {
-    if (qrScanner?.isScanning) qrScanner.stop()
+    if (qrScanner) qrScanner.stop()
     modal.style.display = 'none'
   }
 }
@@ -332,7 +314,9 @@ if (!qrScanner) {
 
 
 <script>
-
+document.addEventListener('gesturestart', function (e) {
+  e.preventDefault();
+});
 
 let lastTouchEnd = 0;
 document.addEventListener('touchend', function (e) {
@@ -374,7 +358,7 @@ document.addEventListener('touchend', function (e) {
 
 
 <script>
-console.log('v1.4a')
+console.log('v1.4b')
 </script>
 
 </body>
