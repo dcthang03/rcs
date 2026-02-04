@@ -86,7 +86,7 @@ const TOP_SEAT = 5
 const SEAT_SIZE = 60
 const TABLE_BORDER = 4
 const SAFE_PADDING = 8
-const HOLD_TIME = 1100
+const HOLD_TIME = 500
 
 /* ===== STATE ===== */
 const seatState = {}
@@ -113,31 +113,49 @@ for (let i = 1; i <= SEAT_COUNT; i++) {
   seat.appendChild(num)
   seat.appendChild(uidEl)
 
-  seat.addEventListener('pointerdown', () => {
-    isHolding = false
-    clearTimeout(holdTimer)
+seat.addEventListener('pointerdown', () => {
+  clearTimeout(holdTimer)
+  isHolding = false
 
-    holdTimer = setTimeout(() => {
-      isHolding = true
-      if (seatState[i].uid) {
-        if (confirm(`Reject UID ${seatState[i].uid.slice(0,6)} ?`)) {
-          ejectUID(i)
-        }
+  holdTimer = setTimeout(() => {
+    isHolding = true
+
+    if (seatState[i].uid) {
+      // 🟥 Ghế có UID → reject
+      if (confirm(`Reject UID ${seatState[i].uid.slice(0,6)} ?`)) {
+        ejectUID(i)
       }
-    }, HOLD_TIME)
-  })
+    } else {
+      // 🟩 Ghế trống → assign
+      const uid = prompt(`UID ghế ${i}`)
+      if (uid) assignUID(i, uid)
+    }
+  }, HOLD_TIME)
+})
 
+seat.addEventListener('pointerup', () => {
+  clearTimeout(holdTimer)
+  holdTimer = null
+  isHolding = false
+})
+
+  /*
   seat.addEventListener('pointerup', () => {
     clearTimeout(holdTimer)
-
+   
+    
     if (!isHolding && !seatState[i].uid) {
       const uid = prompt(`UID ghế ${i}`)
       if (uid) assignUID(i, uid)
     }
+    
+
 
     holdTimer = null
     isHolding = false
   })
+
+  */
 
   seat.addEventListener('pointerleave', () => {
     clearTimeout(holdTimer)
@@ -255,6 +273,6 @@ loadSeats()
 window.addEventListener('resize', renderSeats)
 </script>
 
-<script src="../js/table.js?v=1.2"></script>
+
 </body>
 </html>
