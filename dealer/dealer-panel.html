@@ -70,6 +70,7 @@ body {
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
 
@@ -127,8 +128,7 @@ seat.addEventListener('pointerdown', () => {
       }
     } else {
       // 🟩 Ghế trống → assign
-      const uid = prompt(`UID ghế ${i}`)
-      if (uid) assignUID(i, uid)
+      scanQRAndAssign(i)
     }
   }, HOLD_TIME)
 })
@@ -271,7 +271,67 @@ sb.channel('seats-realtime')
 renderSeats()
 loadSeats()
 window.addEventListener('resize', renderSeats)
+
+/* ===== module quét QR */
+
+let qrScanner = null
+
+function scanQRAndAssign(seatIndex) {
+  const modal = document.getElementById('qrModal')
+  const closeBtn = document.getElementById('closeQR')
+  modal.style.display = 'flex'
+
+  qrScanner = new Html5Qrcode('qr-reader')
+
+  qrScanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: 200 },
+    (decodedText) => {
+      qrScanner.stop()
+      modal.style.display = 'none'
+
+      if (decodedText) {
+        assignUID(seatIndex, decodedText)
+      }
+    }
+  )
+
+  closeBtn.onclick = () => {
+    if (qrScanner) qrScanner.stop()
+    modal.style.display = 'none'
+  }
+}
+
 </script>
+
+
+
+
+
+<div id="qrModal" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+">
+  <div style="width: 260px; background:#000; padding:12px; border-radius:12px">
+    <div id="qr-reader" style="width:100%"></div>
+    <button id="closeQR" style="
+      width:100%;
+      margin-top:10px;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      background:#374151;
+      color:#fff;
+      font-size:16px;
+    ">Cancel</button>
+  </div>
+</div>
+
 
 <script>
 console.log('v1.221')
