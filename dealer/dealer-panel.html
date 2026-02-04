@@ -267,10 +267,15 @@ window.addEventListener('resize', renderSeats)
 
 /* ===== module quét QR */
 
+/* ===== QR SCANNER MODULE (FINAL) ===== */
+
 let qrScanner = null
 let isScanning = false
+let currentSeatIndex = null
 
 function scanQRAndAssign(seatIndex) {
+  currentSeatIndex = seatIndex
+
   const modal = document.getElementById('qrModal')
   const closeBtn = document.getElementById('closeQR')
 
@@ -283,54 +288,62 @@ function scanQRAndAssign(seatIndex) {
   isScanning = true
 
   qrScanner.start(
-  {
-    facingMode: { exact: "environment" },
-    width: { ideal: 640 },
-    height: { ideal: 480 }
-  },
-  {
-    fps: 12,
-    qrbox: { width: 220, height: 220 }
-  },
-  onScanSuccess,
-  onScanError
-);
-
-
-
-
-
-    (decodedText) => {
-      if (!isScanning) return
-      isScanning = false
-
-      qrScanner.stop().then(() => {
-        modal.style.display = 'none'
-      })
-
-      if (!decodedText) return
-
-      // ⚡ xử lý UID gọn & nhanh
-      const uid = decodedText.match(/[a-zA-Z0-9]+/)?.[0]?.toUpperCase()
-
-      if (!uid) {
-        alert('QR không hợp lệ')
-        return
-      }
-
-      navigator.vibrate?.(30)
-      assignUID(seatIndex, uid)
-    }
+    {
+      facingMode: "environment",   // ✅ luôn camera sau – an toàn iPhone
+      width: { ideal: 640 },
+      height: { ideal: 480 }
+    },
+    {
+      fps: 12,
+      qrbox: { width: 220, height: 220 }
+    },
+    onScanSuccess,
+    onScanError
   )
 
-  closeBtn.onclick = () => {
-    isScanning = false
-    if (qrScanner?.isScanning) {
-      qrScanner.stop()
-    }
-    modal.style.display = 'none'
-  }
+  closeBtn.onclick = closeQR
 }
+
+function onScanSuccess(decodedText) {
+  if (!isScanning) return
+  isScanning = false
+
+  const modal = document.getElementById('qrModal')
+
+  qrScanner.stop().then(() => {
+    modal.style.display = 'none'
+  })
+
+  if (!decodedText) return
+
+  // ⚡ Parse UID nhanh – chỉ chữ + số
+  const uid = decodedText.match(/[a-zA-Z0-9]+/)?.[0]?.toUpperCase()
+
+  if (!uid) {
+    alert('QR không hợp lệ')
+    return
+  }
+
+  navigator.vibrate?.(30)
+  assignUID(currentSeatIndex, uid)
+}
+
+function onScanError(_) {
+  // ❗ Bỏ qua noise QR – không log, không alert
+}
+
+function closeQR() {
+  isScanning = false
+
+  const modal = document.getElementById('qrModal')
+
+  if (qrScanner?.isScanning) {
+    qrScanner.stop().catch(() => {})
+  }
+
+  modal.style.display = 'none'
+}
+
 
 
 </script>
@@ -382,7 +395,7 @@ document.addEventListener('touchend', function (e) {
 
 
 <script>
-console.log('v1.338')
+console.log('v1.337')
 </script>
 
 </body>
