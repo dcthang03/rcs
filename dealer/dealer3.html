@@ -195,6 +195,9 @@ input, button { font-size: 16px; }
   touch-action: none;
 }
 
+.slide-track.disabled {
+  opacity: .4;
+}
 
 
 
@@ -276,7 +279,7 @@ input, button { font-size: 16px; }
     Next Hand
  
   </button>
-  <!-- thanh slide--> >
+  <!-- thanh slide--> 
   <div class="slide-container">
   <div class="slide-track">
     <span class="slide-text">Slide to Next Hand</span>
@@ -565,6 +568,8 @@ thumb.addEventListener('pointerdown', e => {
   isDragging = true
   startX = e.clientX - thumb.offsetLeft
   thumb.setPointerCapture(e.pointerId)
+  if (!selectedPlayerId || isSubmitting) return
+
 })
 
 document.addEventListener('pointermove', e => {
@@ -581,12 +586,22 @@ document.addEventListener('pointerup', () => {
   if (currentX > maxX() * 0.85) {
     thumb.style.left = maxX() + 'px'
 
+document.addEventListener('pointercancel', () => {
+  isDragging = false
+  thumb.style.left = '4px'
+})
+
     // 🔥 GỌI NÚT CŨ
     document.getElementById('nextHandBtn').click()
   } else {
     thumb.style.left = '4px'
   }
 }) 
+
+function resetSlider(){
+  currentX = 0
+  thumb.style.left = '4px'
+}
 
  
 
@@ -788,6 +803,7 @@ function addRake(amount){
   }
 }
 
+
 // Undo
 
 function undoRake(){
@@ -809,7 +825,18 @@ function updateDisplay(){
 
   document.getElementById("nextHandBtn")
     .innerText = `Next Hand • $${rakeTotal}`;
+
+    document.getElementById("slideText")
+  .innerText = `Slide to Next Hand • $${rakeTotal}`
+
 }
+
+const slideTrack = document.querySelector('.slide-track')
+slideTrack.classList.toggle(
+  'disabled',
+  !selectedPlayerId || isSubmitting
+)
+
 
 //Next Hand
 
@@ -885,6 +912,7 @@ function resetUI(){
   rakeHistory = [];
 
   updateDisplay();
+    resetSlider();
 }
 // chống double insert rake
 
