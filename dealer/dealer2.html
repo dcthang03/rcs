@@ -228,6 +228,26 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 let TABLE_ID = null
 let pin = ''
 
+function press(n) {
+  if (pin.length >= 4) return
+  pin += n
+  updateDots()
+}
+
+function backPin() {
+  pin = pin.slice(0, -1)
+  updateDots()
+}
+
+function updateDots() {
+  document.querySelectorAll('.pin-dot').forEach((d, i) => {
+    d.classList.toggle('filled', i < pin.length)
+  })
+}
+
+
+
+
 async function submitLogin() {
   const table = document.getElementById('tableSelect').value
   if (!table) return alert('Chưa chọn bàn')
