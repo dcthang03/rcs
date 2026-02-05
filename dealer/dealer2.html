@@ -777,7 +777,7 @@ async function createHand() {
     const { data: hand, error: handError } = await sb
       .from("hands")
       .insert({
-        player_id: selectedPlayerId,
+        player_id: selectedPlayerId, // "A001"
         rake: rakeTotal
       })
       .select()
@@ -790,14 +790,14 @@ async function createHand() {
       const { error: rakeError } = await sb
         .from("rake_logs")
         .insert({
-          player_id: selectedPlayerId,
+          player_id: selectedPlayerId, // "A001"
           hand_id: hand.id,
           amount: rakeTotal
         });
 
       if (rakeError) throw rakeError;
 
-      // 3️⃣ cộng tổng rake player
+      // 3️⃣ cộng tổng rake
       const { error: sumError } = await sb.rpc(
         "add_player_rake",
         {
@@ -819,6 +819,7 @@ async function createHand() {
   }
 }
 
+
 //Reset
 function resetUI(){
 
@@ -835,7 +836,7 @@ function resetUI(){
 
 
 
-console.log('dealer2.html V.205')
+console.log('dealer2.html V.207')
 </script>
 
 </body>
