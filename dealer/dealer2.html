@@ -769,14 +769,12 @@ async function confirmNoRake(){
 }
 
 //Create hand nhưng chưa có table_id/dealer_id (mốt thêm sau)
-async function createHand(){
-
-  try{
-
+async function createHand() {
+  try {
     isSubmitting = true;
 
     // 1️⃣ insert hand
-    const { data: hand, error: handError } = await supabase
+    const { data: hand, error: handError } = await sb
       .from("hands")
       .insert({
         player_id: selectedPlayerId,
@@ -785,12 +783,11 @@ async function createHand(){
       .select()
       .single();
 
-    if(handError) throw handError;
+    if (handError) throw handError;
 
     // 2️⃣ nếu có rake → log
-    if(rakeTotal > 0){
-
-      const { error: rakeError } = await supabase
+    if (rakeTotal > 0) {
+      const { error: rakeError } = await sb
         .from("rake_logs")
         .insert({
           player_id: selectedPlayerId,
@@ -798,17 +795,15 @@ async function createHand(){
           amount: rakeTotal
         });
 
-      if(rakeError) throw rakeError;
+      if (rakeError) throw rakeError;
     }
 
     resetUI();
 
-  }catch(err){
-
+  } catch (err) {
     console.error(err);
     alert("Insert failed");
-
-  }finally{
+  } finally {
     isSubmitting = false;
   }
 }
@@ -829,7 +824,7 @@ function resetUI(){
 
 
 
-console.log('dealer2.html V.203')
+console.log('dealer2.html V.204')
 </script>
 
 </body>
