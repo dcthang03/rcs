@@ -785,7 +785,7 @@ async function createHand() {
 
     if (handError) throw handError;
 
-    // 2️⃣ nếu có rake → log
+    // 2️⃣ log rake
     if (rakeTotal > 0) {
       const { error: rakeError } = await sb
         .from("rake_logs")
@@ -796,13 +796,24 @@ async function createHand() {
         });
 
       if (rakeError) throw rakeError;
+
+      // 3️⃣ cộng tổng rake player
+      const { error: sumError } = await sb.rpc(
+        "add_player_rake",
+        {
+          p_uid: selectedPlayerId,
+          p_amount: rakeTotal
+        }
+      );
+
+      if (sumError) throw sumError;
     }
 
     resetUI();
 
   } catch (err) {
     console.error(err);
-    alert("Insert failed");
+    alert(err.message || "Insert failed");
   } finally {
     isSubmitting = false;
   }
@@ -824,7 +835,7 @@ function resetUI(){
 
 
 
-console.log('dealer2.html V.204')
+console.log('dealer2.html V.205')
 </script>
 
 </body>
