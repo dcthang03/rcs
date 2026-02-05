@@ -403,6 +403,19 @@ function renderSeats() {
 /* (GIỮ NGUYÊN PHẦN CÒN LẠI CỦA BẠN – KHÔNG ĐỘNG GÌ) */
 
 /* ===== DB ===== */
+
+async function isValidPlayerUID(uid) {
+  const { data, error } = await sb
+    .from('players')
+    .select('uid')
+    .eq('uid', uid)
+    .single()
+
+  if (error || !data) return false
+  return true
+}
+
+
 async function assignUID(seat, uid) {
   seatState[seat].uid = uid
   renderSeats()
@@ -490,9 +503,20 @@ async function scanQRAndAssign(seatIndex) {
         await safeStopQR()
         modal.style.display = 'none'
 
-        const uid = text?.trim().replace(/[^a-zA-Z0-9]/g,'').toUpperCase()
-        if (!uid) return alert('QR không hợp lệ')
-        assignUID(seatIndex, uid)
+      const uid = text?.trim().replace(/[^a-zA-Z0-9]/g,'').toUpperCase()
+if (!uid) return alert('QR không hợp lệ')
+
+// 🔍 check UID trong bảng players
+const exists = await isValidPlayerUID(uid)
+if (!exists) {
+  alert('❌ UID không tồn tại trong hệ thống')
+  return
+}
+
+// ✅ UID hợp lệ → cho gán ghế
+assignUID(seatIndex, uid)
+
+
       }
     )
   }, 150)
@@ -515,7 +539,7 @@ async function safeStopQR() {
 
 
 
-console.log('dealer2.html V.101')
+console.log('dealer2.html V.102')
 </script>
 
 </body>
