@@ -155,6 +155,13 @@ input, button { font-size: 16px; }
   opacity: .9;
 }
 
+.seat.selected {
+  background: #f59e0b;      /* vàng cam */
+  border-color: #fbbf24;
+  color: #000;
+  box-shadow: 0 0 0 3px rgba(245,158,11,.4);
+}
+
 .slide-container {
   width: 100%;
   max-width: 360px;
@@ -484,6 +491,7 @@ let rakeTotal = 0;
 let rakeHistory = [];
 let selectedPlayerId = null;
 let selectedSeatLabel = "";
+let selectedSeatNumber = null; //chọn ghế
 let isSubmitting = false;
 
 const seatState = {}
@@ -539,19 +547,36 @@ function createSeats() {
 
     // ===== TAP (select seat) =====
     seat.addEventListener('click', () => {
-      if (didHold) return
-      if (!seatState[i].uid) return
+  if (didHold) return;
+  if (!seatState[i].uid) return;
 
-      selectSeat(
-        seatState[i].uid,
-        `Seat ${i} • ${seatState[i].uid.slice(0,4)}`
-      )
-    })
+  // 🔁 Click lại ghế đang chọn → bỏ chọn
+  if (selectedSeatNumber === i) {
+    selectedSeatNumber = null;
+    selectedPlayerId = null;
+    selectedSeatLabel = "";
 
-    seats[i] = { el: seat, uidEl }
-    tableEl.appendChild(seat)
+    rakeTotal = 0;
+    rakeHistory = [];
+
+    const seatEl = document.getElementById("selectedSeat");
+    if (seatEl) {
+      seatEl.innerText = "No seat selected";
+    }
+
+    renderSeats();
+    updateDisplay();
+    resetSlider();
+    return;
   }
-}
+
+  // 👉 Chọn ghế mới
+  selectSeat(
+    seatState[i].uid,
+    `Seat ${i} • ${seatState[i].uid.slice(0,4)}`,
+    i
+  );
+});
 
 
 // chỉ gọi click của button cũ
@@ -623,7 +648,20 @@ function renderSeats() {
     el.style.top  = cy + Math.sin(angle)*rY + 'px'
     el.style.transform = 'translate(-50%,-50%)'
 
-    el.classList.toggle('occupied', !!seatState[i].uid)
+    el.classList.remove('occupied', 'selected');
+
+if (seatState[i].uid) {
+  el.classList.add('occupied');
+}
+
+if (selectedSeatNumber === i) {
+  el.classList.add('selected');
+}
+
+
+
+
+
     uidEl.textContent = seatState[i].uid ? seatState[i].uid.slice(0,4) : ''
   }
 }
@@ -769,7 +807,7 @@ async function safeStopQR() {
 
 
 // gọi fuction này từ UI seat
-function selectSeat(playerId, seatLabel){
+function selectSeat(playerId, seatLabel, seatNumber){
 
   // auto reset khi đổi seat
   rakeTotal = 0;
@@ -777,10 +815,11 @@ function selectSeat(playerId, seatLabel){
 
   selectedPlayerId = playerId;
   selectedSeatLabel = seatLabel;
+  selectedSeatNumber = seatNumber;
 
-  document.getElementById("selectedSeat")
-    .innerText = seatLabel;
-
+  document.getElementById("selectedSeat").innerText = seatLabel;
+  
+  renderSeats(); 
   updateDisplay();
 }
 
@@ -920,15 +959,18 @@ function resetUI(){
   // reset seat đang chọn
   selectedPlayerId = null;
   selectedSeatLabel = "";
+  selectedSeatNumber = null;
 
-  // reset UI control panel
+  // reset control panel
   const seatEl = document.getElementById("selectedSeat");
   if (seatEl) {
     seatEl.innerText = "No seat selected";
   }
 
+  // reset UI khác
   updateDisplay();
   resetSlider();
+  renderSeats();   // 🔥 rất quan trọng: bỏ màu ghế đang chọn
 }
 // chống double insert rake
 
