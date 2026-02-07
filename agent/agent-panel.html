@@ -20,63 +20,15 @@ body{
   background:#020617;
   color:white;
   min-height:100vh;
-  display:flex;
-}
-
-/* ===== SIDEBAR ===== */
-.sidebar{
-  width:240px;
-  background:#020617;
-  border-right:1px solid rgba(255,255,255,0.06);
-  padding:24px;
-}
-
-.logo{
-  font-size:20px;
-  font-weight:600;
-  margin-bottom:32px;
-}
-
-.menu-item{
-  padding:12px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:8px;
-  transition:.2s;
-  color:#cbd5e1;
-}
-
-.menu-item:hover{
-  background:rgba(99,102,241,0.15);
-  color:white;
-}
-
-.menu-item.active{
-  background:#6366f1;
-  color:white;
-}
-
-.logout{
-  position:absolute;
-  bottom:24px;
-  width:192px;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.08);
-  text-align:center;
-  cursor:pointer;
-  color:#f87171;
-}
-
-.logout:hover{
-  background:rgba(248,113,113,0.1);
 }
 
 /* ===== MAIN ===== */
+
 .main{
-  flex:1;
-  padding:32px;
+  padding:24px;
 }
+
+/* TOPBAR */
 
 .topbar{
   display:flex;
@@ -85,20 +37,35 @@ body{
   margin-bottom:28px;
 }
 
+.logout{
+  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.15);
+  cursor:pointer;
+  color:#f87171;
+}
+
+.logout:hover{
+  background:rgba(248,113,113,0.1);
+}
+
 .agent-name{
   color:#94a3b8;
+  margin-bottom:20px;
 }
+
+/* CARDS */
 
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:18px;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;
   margin-bottom:32px;
 }
 
 .card{
-  padding:22px;
-  border-radius:16px;
+  padding:18px;
+  border-radius:14px;
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.06);
 }
@@ -106,21 +73,18 @@ body{
 .card-title{
   color:#94a3b8;
   font-size:13px;
-  margin-bottom:6px;
 }
 
 .card-value{
-  font-size:26px;
+  font-size:24px;
   font-weight:600;
+  margin-top:6px;
 }
 
-.section{
-  margin-top:26px;
-}
+/* TABLE */
 
 .section-title{
-  margin-bottom:14px;
-  font-weight:500;
+  margin-bottom:12px;
 }
 
 .table{
@@ -132,7 +96,6 @@ body{
   text-align:left;
   padding:12px;
   color:#94a3b8;
-  font-weight:500;
   border-bottom:1px solid rgba(255,255,255,0.06);
 }
 
@@ -156,32 +119,18 @@ body{
   background:#4f46e5;
 }
 
-/* MOBILE */
-@media(max-width:900px){
-  .sidebar{
-    display:none;
-  }
-}
-
 </style>
 </head>
 <body>
-
-<div class="sidebar">
-  <div class="logo">Agent Panel</div>
-
-  <div class="menu-item active">Dashboard</div>
-  <div class="menu-item" onclick="openPlayer()">Player Page</div>
-
-  <div class="logout" onclick="logout()">Logout</div>
-</div>
 
 <div class="main">
 
   <div class="topbar">
     <h2>Dashboard</h2>
-    <div class="agent-name" id="agentName"></div>
+    <div class="logout" onclick="logout()">Logout</div>
   </div>
+
+  <div class="agent-name" id="agentName"></div>
 
   <div class="cards">
 
@@ -205,14 +154,14 @@ body{
   <div class="section">
     <div class="section-title">Your Players</div>
 
-    <table class="table" id="playersTable">
+    <table class="table">
       <thead>
         <tr>
           <th>Player ID</th>
           <th>Total Rake</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="playersBody"></tbody>
     </table>
 
     <button class="open-player" onclick="openPlayer()">
@@ -227,12 +176,11 @@ body{
 
 <script>
 
+// INIT
 const sb = supabase.createClient(
   "https://ymtmipkmknnsqleahlmi.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltdG1pcGtta25uc3FsZWFobG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwOTU1MjUsImV4cCI6MjA4NTY3MTUyNX0.7pEza-TKBKJ_xqdBu93nLo-PRaHDcDIxW-bjZnrFJxw"
 );
-
-/* ===== PROTECT PAGE ===== */
 
 const agent_uid = localStorage.getItem("agent_uid");
 
@@ -240,100 +188,59 @@ if(!agent_uid){
   window.location.href = "/login.html";
 }
 
-loadDashboard();
-
-async function loadDashboard(){
-
-  document.getElementById("agentName").innerText = `Agent: ${agent_uid}`;
-
-  // players
-  const { data: players } = await sb
-    .from("players")
-    .select("player_uid,total_rake")
-    .eq("agent_uid",agent_uid);
-
-  document.getElementById("totalPlayers").innerText = players?.length || 0;
-
-  let totalRake = 0;
-
-  const tbody = document.querySelector("#playersTable tbody");
-  tbody.innerHTML = "";
-
-  players?.forEach(p=>{
-    totalRake += Number(p.total_rake || 0);
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${p.player_id}</td>
-        <td>$${Number(p.total_rake || 0).toLocaleString()}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("totalRake").innerText = "$" + totalRake.toLocaleString();
+// DOM cache (pro tip)
+const playersBody = document.getElementById("playersBody");
+const totalPlayersEl = document.getElementById("totalPlayers");
+const totalRakeEl = document.getElementById("totalRake");
+const todayRakeEl = document.getElementById("todayRake");
+const agentNameEl = document.getElementById("agentName");
 
 
-  // today rake
-  const today = new Date().toISOString().slice(0,10);
+// FETCH
+async function getPlayers(){
 
-  const { data: todayLogs } = await sb
-    .from("rake_logs")
-    .select("rake")
-    .eq("agent_uid",agent_uid)
-    .gte("created_at", today);
-
-  let todayTotal = 0;
-
-  todayLogs?.forEach(r=>{
-    todayTotal += Number(r.rake || 0);
-  });
-
-  document.getElementById("todayRake").innerText = "$" + todayTotal.toLocaleString();
-}
-
-function logout(){
-  localStorage.removeItem("agent_uid");
-  window.location.href = "/login.html";
-}
-
-function openPlayer(){
-  window.location.href = "/agent-player.html";
-}
-
-// tổng rak
-const { data: rakeSum } = await sb
-  .from("players")
-  .select("total_rake.sum()")
-  .eq("agent_uid", agent_uid)
-  .single();
-
-document.getElementById("totalRake").innerText =
-  "$" + Number(rakeSum.sum || 0).toLocaleString();
-
-  // đếm player
-  const { count } = await sb
-  .from("players")
-  .select("*", { count: "exact", head: true })
-  .eq("agent_uid", agent_uid);
-
-totalPlayers.innerText = count;
-
-// Fetch layer
-async function getPlayers(agent_uid){
   const { data, error } = await sb
     .from("players")
     .select("player_uid,total_rake")
     .eq("agent_uid", agent_uid)
     .order("total_rake",{ascending:false});
 
+  if(error){
+    console.error("Supabase error:", error);
+    return [];
+  }
+
   return data || [];
 }
 
-// Render player
 
+async function getTodayRake(){
+
+  const today = new Date().toISOString().slice(0,10);
+
+  const { data, error } = await sb
+    .from("rake_logs")
+    .select("rake")
+    .eq("agent_uid",agent_uid)
+    .gte("created_at", today);
+
+  if(error){
+    console.error(error);
+    return 0;
+  }
+
+  let total = 0;
+
+  data?.forEach(r=>{
+    total += Number(r.rake || 0);
+  });
+
+  return total;
+}
+
+
+// RENDER
 function renderPlayers(players){
-
-  const tbody = document.querySelector("#playersTable tbody");
 
   let rows = "";
   let totalRake = 0;
@@ -351,30 +258,39 @@ function renderPlayers(players){
     `;
   });
 
-  // render đúng 1 lần
-  tbody.innerHTML = rows;
+  playersBody.innerHTML = rows;
 
-  document.getElementById("totalPlayers").innerText = players.length;
-  document.getElementById("totalRake").innerText =
-    "$" + totalRake.toLocaleString();
+  totalPlayersEl.innerText = players.length;
+  totalRakeEl.innerText = "$" + totalRake.toLocaleString();
 }
 
 
-// Contrller
+// CONTROLLER
 async function loadDashboard(){
 
-  document.getElementById("agentName").innerText =
-    `Agent: ${agent_uid}`;
+  agentNameEl.innerText = `Agent: ${agent_uid}`;
 
-  const players = await getPlayers(agent_uid);
-
+  const players = await getPlayers();
   renderPlayers(players);
 
+  const today = await getTodayRake();
+  todayRakeEl.innerText = "$" + today.toLocaleString();
 }
 
 
+// ACTIONS
+function logout(){
+  localStorage.removeItem("agent_uid");
+  window.location.href = "/login.html";
+}
+
+function openPlayer(){
+  window.location.href = "/agent-player.html";
+}
 
 
+// START APP
+loadDashboard();
 
 </script>
 
