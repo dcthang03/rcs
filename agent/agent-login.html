@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Agent Login</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -14,14 +14,17 @@
   padding:0;
   box-sizing:border-box;
   font-family:'Inter',sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body{
-  height:100vh;
+  height:100dvh;
+  overflow:hidden;
   display:flex;
   align-items:center;
   justify-content:center;
   background: linear-gradient(135deg,#0f172a,#020617);
+  touch-action: manipulation;
 }
 
 .login-card{
