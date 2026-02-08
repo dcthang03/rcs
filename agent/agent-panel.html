@@ -217,9 +217,7 @@ async function getPlayers(){
   const { data, error } = await sb
     .from("players")
     .select("player_uid,total_rake")
-    const { data: sessions } = await sb
-  .from("player_sessions")
-  .select("player_uid,is_online");
+    .eq("agent_uid", agent_uid); // ⭐ QUAN TRỌNG NHẤT
 
   if(error){
     console.error(error);
@@ -228,6 +226,7 @@ async function getPlayers(){
 
   return data || [];
 }
+
 
 // WEEK RANGE
 function getWeekRange(offset = 0){
@@ -301,9 +300,7 @@ async function attachWeeklyRake(players){
 async function attachPlayerState(players){
 
   // ONLINE STATUS (optional nếu bạn vẫn muốn giữ)
-  const { data: sessions } = await sb
-    .from("player_sessions")
-    .select("player_uid,is_online")
+
     
 
   // ⭐ LẤY POSITION TỪ SEATS
@@ -317,30 +314,46 @@ async function attachPlayerState(players){
     .select("player_uid,note")
     .eq("agent_uid", agent_uid);
 
-  const sessionMap = {};
+
   const seatMap = {};
   const noteMap = {};
 
-  sessions?.forEach(s => {
-  sessionMap[String(s.player_uid)] = s;
-});
+  
 
 
 
   notes?.forEach(n => noteMap[n.player_uid] = n.note);
 
   // map seat
-  seats?.forEach(seat=>{
-    if(seat.player_uid){
-      seatMap[seat.player_uid] =
-        `${seat.table_uid}-${seat.seat_number}`;
-    }
-  });
+seats?.forEach(seat=>{
+  if(seat.player_uid){
+
+    const uid = String(seat.player_uid);
+
+    seatMap[uid] = {
+      table: `${seat.table_uid}-${seat.seat_number}`,
+      online: true
+    };
+  }
+});
+
+
+
+
 
   players.forEach(p=>{
 
-    p.is_online =
-  sessionMap[String(p.player_uid)]?.is_online === true;
+    const seatData =
+  seatMap[String(p.player_uid)];
+
+p.is_online = Boolean(seatData);
+
+p.table_position =
+  seatData?.table || "-";
+
+p.note = noteMap[p.player_uid] || "";
+
+ 
 
     // ⭐ TABLE-SEAT COMBINED
     p.table_position = seatMap[p.player_uid] || "-";
@@ -391,16 +404,19 @@ function renderTable(){
     </tr>
   `;
     const sortedPlayers = [...allPlayers]
-  .sort((a,b)=>
-  (b.is_online - a.is_online) ||
-  (b.table_position !== "-" ? 1 : -1)
-);
+ .sort((a,b)=> b.is_online - a.is_online);
 
 
   playersBody.innerHTML = sortedPlayers.map(p=>`
     <tr>
       <td>${p.player_uid}</td>
-      <td>${p.is_online ? "🟢 Online" : "⚫ Offline"}</td>
+        <td>
+  ${p.is_online
+    ? "🎮 Playing"
+    : "⚫ Idle"}
+</td>
+
+
       <td>
   ${p.table_position === "-" 
     ? "-"
