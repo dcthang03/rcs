@@ -594,7 +594,7 @@ async function loadDashboard(){
   renderTable();
 }
 
-// Realtime listerner
+// Realtime listerner bảng rake_logs
 sb.channel('rake-live')
 .on(
   'postgres_changes',
@@ -640,7 +640,37 @@ sb.channel('rake-live')
 )
 .subscribe();
 
+//realtime bảng seats
+sb.channel('seats-live')
+.on(
+  'postgres_changes',
+  {
+    event: 'UPDATE',
+    schema: 'public',
+    table: 'seats',
+    filter: 'player_uid=not.is.null'
+  },
+  payload => {
 
+    const seat = payload.new;
+
+    console.log("Player sat:", seat);
+
+    // ví dụ update UI ngay
+    updateSeatUI(seat);
+
+    // nếu muốn sync player activity:
+    const player = allPlayers.find(
+      p => p.player_uid === seat.player_uid
+    );
+
+    if(player){
+       player.last_activity = new Date().toISOString();
+    }
+
+  }
+)
+.subscribe();
 
 
 
