@@ -645,33 +645,54 @@ sb.channel('seats-live')
 .on(
   'postgres_changes',
   {
-    event: 'UPDATE',
-    schema: 'public',
-    table: 'seats',
-    filter: `agent_uid=eq.${agent_uid}`
-    
+    event:'*',
+    schema:'public',
+    table:'seats'
   },
   payload => {
 
-    const seat = payload.new;
+    const oldSeat = payload.old;
+    const newSeat = payload.new;
 
-    console.log("Player sat:", seat);
+    // PLAYER SAT
+    if(!oldSeat.player_uid && newSeat.player_uid){
 
-    // ví dụ update UI ngay
-    updateSeatUI(seat);
+      const player = allPlayers.find(
+        p => p.player_uid === newSeat.player_uid
+      );
 
-    // nếu muốn sync player activity:
-    const player = allPlayers.find(
-      p => p.player_uid === seat.player_uid
-    );
-
-    if(player){
-       player.last_activity = new Date().toISOString();
+      if(player){
+        player.is_online = true;
+        player.table_position =
+          `${newSeat.table_uid}-${newSeat.seat_number}`;
+      }
     }
 
+    // PLAYER LEFT
+    if(oldSeat.player_uid && !newSeat.player_uid){
+
+      const player = allPlayers.find(
+        p => p.player_uid === oldSeat.player_uid
+      );
+
+      if(player){
+        player.is_online = false;
+        player.table_position = "-";
+      }
+    }
+
+    // ⭐ update counter
+    const onlineCount =
+      allPlayers.filter(p=>p.is_online).length;
+
+    totalPlayersEl.innerHTML =
+      `<span style="color:#4ade80">${onlineCount}</span> / ${allPlayers.length}`;
+
+    renderTable();
   }
 )
 .subscribe();
+
 
 
 
