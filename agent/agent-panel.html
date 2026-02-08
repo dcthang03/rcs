@@ -217,7 +217,9 @@ async function getPlayers(){
   const { data, error } = await sb
     .from("players")
     .select("player_uid,total_rake")
-    .eq("agent_uid", agent_uid);
+    const { data: sessions } = await sb
+  .from("player_sessions")
+  .select("player_uid,is_online");
 
   if(error){
     console.error(error);
@@ -298,10 +300,17 @@ async function attachWeeklyRake(players){
 
 async function attachPlayerState(players){
 
+  // ONLINE STATUS (optional nếu bạn vẫn muốn giữ)
   const { data: sessions } = await sb
     .from("player_sessions")
-    .select("player_uid,is_online,table_id,seat")
+    .select("player_uid,is_online")
     .eq("agent_uid", agent_uid);
+
+  // ⭐ LẤY POSITION TỪ SEATS
+  const { data: seats } = await sb
+  .from("seats")
+  .select("player_uid,table_uid,seat_number")
+  .not("player_uid","is",null);
 
   const { data: notes } = await sb
     .from("agent_player_notes")
@@ -309,24 +318,33 @@ async function attachPlayerState(players){
     .eq("agent_uid", agent_uid);
 
   const sessionMap = {};
+  const seatMap = {};
   const noteMap = {};
 
   sessions?.forEach(s => sessionMap[s.player_uid] = s);
   notes?.forEach(n => noteMap[n.player_uid] = n.note);
 
+  // map seat
+  seats?.forEach(seat=>{
+    if(seat.player_uid){
+      seatMap[seat.player_uid] =
+        `${seat.table_uid}-${seat.seat_number}`;
+    }
+  });
+
   players.forEach(p=>{
 
-    const s = sessionMap[p.player_uid];
+    p.is_online = sessionMap[p.player_uid]?.is_online || false;
 
-    p.is_online = s?.is_online || false;
-    p.table_id = s?.table_id || null;
-    p.seat = s?.seat ?? null;
+    // ⭐ TABLE-SEAT COMBINED
+    p.table_position = seatMap[p.player_uid] || "-";
 
     p.note = noteMap[p.player_uid] || "";
   });
 
   return players;
 }
+
 
 
 
@@ -358,41 +376,57 @@ function renderTable(){
   // PLAYER STATE MODE
   if(currentView === "players_state"){
 
-    document.querySelector(".table thead").innerHTML = `
-      <tr>
-        <th>Player</th>
-        <th>Status</th>
-        <th>Table</th>
-        <th>Seat</th>
-        <th>Note</th>
-      </tr>
-    `;
+  document.querySelector(".table thead").innerHTML = `
+    <tr>
+      <th>Player</th>
+      <th>Status</th>
+      <th>Table</th>
+      <th>Note</th>
+    </tr>
+  `;
+    const sortedPlayers = [...allPlayers]
+  .sort((a,b)=>
+  (b.is_online - a.is_online) ||
+  (b.table_position !== "-" ? 1 : -1)
+);
 
-    playersBody.innerHTML = allPlayers.map(p=>`
-      <tr>
-        <td>${p.player_uid}</td>
-        <td>${p.is_online ? "🟢 Online" : "⚫ Offline"}</td>
-        <td>${p.table_id || "-"}</td>
-        <td>${p.seat ?? "-"}</td>
-        <td>
-          <input 
-            value="${p.note || ""}"
-            onchange="saveNote('${p.player_uid}', this.value)"
-            style="
-              background:transparent;
-              border:1px solid rgba(255,255,255,.1);
-              color:white;
-              padding:6px;
-              border-radius:6px;
-              width:140px;
-            "
-          />
-        </td>
-      </tr>
-    `).join("");
 
-    return;
+  playersBody.innerHTML = sortedPlayers.map(p=>`
+    <tr>
+      <td>${p.player_uid}</td>
+      <td>${p.is_online ? "🟢 Online" : "⚫ Offline"}</td>
+      <td>
+  ${p.table_position === "-" 
+    ? "-"
+    : `<span style="color:#4ade80;font-weight:600">
+        ${p.table_position}
+      </span>`
   }
+</td>    
+      
+      
+      
+      
+      <td>
+        <input 
+          value="${p.note || ""}"
+          onchange="saveNote('${p.player_uid}', this.value)"
+          style="
+            background:transparent;
+            border:1px solid rgba(255,255,255,.1);
+            color:white;
+            padding:6px;
+            border-radius:6px;
+            width:140px;
+          "
+        />
+      </td>
+    </tr>
+  `).join("");
+
+  return;
+}
+
 
 
   // RAKE MODES
@@ -455,6 +489,14 @@ async function loadDashboard(){
   players = await attachPlayerState(players);
 
   allPlayers = players;
+
+    const onlineCount =
+  players.filter(p=>p.is_online).length;
+
+totalPlayersEl.innerText =
+  `${players.length} (${onlineCount} online)`;
+
+  
 
   totalPlayersEl.innerText = players.length;
 
