@@ -147,12 +147,12 @@ body{
     </div>
 
     <div class="card active" data-view="this_week">
-      <div class="card-title">This Week Rake</div>
+      <div class="card-title">This Week</div>
       <div class="card-value" id="thisWeekRake">--</div>
     </div>
 
     <div class="card" data-view="last_week">
-      <div class="card-title">Last Week Rake</div>
+      <div class="card-title">Last Week</div>
       <div class="card-value" id="lastWeekRake">--</div>
     </div>
 
@@ -166,7 +166,7 @@ body{
         <tr>
           <th>Player ID</th>
           
-          <th id="tableMetric">This Week Rake</th>
+          <th id="tableMetric">This Week</th>
           
         </tr>
       </thead>
@@ -490,16 +490,20 @@ function renderTable(){
     currentView === "total"
       ? "Total Rake"
       : currentView === "this_week"
-      ? "This Week Rake"
-      : "Last Week Rake";
+      ? "This Week"
+      : "Last Week";
 
-  document.querySelector(".table thead").innerHTML = `
-    <tr>
-      <th>Player ID</th>
-      <th>${metricText}</th>
-      <th>Last Activity</th> 
-    </tr>
-  `;
+document.querySelector(".table thead").innerHTML = `
+<tr>
+  <th>Player ID</th>
+  <th>${metricText}</th>
+  ${
+    currentView !== "last_week"
+      ? "<th>Last Activity</th>"
+      : ""
+  }
+</tr>
+`;
 
   const sorted = [...allPlayers].sort((a,b)=>{
 
@@ -535,7 +539,17 @@ function renderTable(){
     
         <td>${p.player_uid}</td>
         <td>$${Number(value||0).toLocaleString()}</td>
-        <td style="color:#4ade80;font-weight:600;width:140px;"> ${formatLastActivity(p)} </td>
+
+${
+  currentView !== "last_week"
+    ? `
+<td style="color:#4ade80;font-weight:600;width:150px;">
+  ${formatLastActivity(p)}
+</td>
+`
+    : ""
+}
+
 
       </tr>
     `;
