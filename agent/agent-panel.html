@@ -196,6 +196,11 @@ if(!agent_uid){
 let allPlayers = [];
 let currentView = "this_week";
 
+let serverNow = null;          // Date (giờ server)
+let serverClockSkewMs = 0;     // serverNow - clientNow
+let weekRolloverTimer = null;  // setTimeout handle
+
+
 // DOM
 const playersBody = document.getElementById("playersBody");
 const totalPlayersEl = document.getElementById("totalPlayers");
@@ -227,12 +232,37 @@ async function getPlayers(){
   return data || [];
 }
 
+// hàm lấy giờ server
+
+async function syncServerTime(){
+  const { data, error } = await sb.rpc("get_server_now");
+  if(error){
+    console.error("get_server_now error:", error);
+    // fallback: nếu lỗi RPC thì dùng giờ máy, nhưng sẽ kém chính xác
+    serverNow = new Date();
+    serverClockSkewMs = 0;
+    return;
+  }
+
+  // data thường là string ISO timestamptz
+  const sNow = new Date(data);
+  const cNow = new Date();
+
+  serverNow = sNow;
+  serverClockSkewMs = sNow.getTime() - cNow.getTime();
+}
+
+function getServerNow(){
+  return new Date(Date.now() + serverClockSkewMs);
+}
+
 
 // WEEK RANGE
-function getWeekRange(offset = 0){
+function getWeekRange(offset = 0, baseDate = null){
 
-  const now = new Date();
-  const day = now.getDay();
+  const now = baseDate ? new Date(baseDate) : getServerNow();
+
+  const day = now.getDay(); // 0=Sun..6=Sat
   const diffToMonday = (day === 0 ? -6 : 1 - day);
 
   const monday = new Date(now);
@@ -245,6 +275,7 @@ function getWeekRange(offset = 0){
 
   return { start: monday, end: sunday };
 }
+
 
 
 // =============================
@@ -263,8 +294,9 @@ async function attachWeeklyRake(players){
     return players;
   }
 
-  const thisWeek = getWeekRange(0);
-  const lastWeek = getWeekRange(-1);
+const base = getServerNow();
+const thisWeek = getWeekRange(0, base);
+const lastWeek = getWeekRange(-1, base);
 
   const map = {};
 
@@ -631,6 +663,43 @@ function renderTable(){
 // DASHBOARD
 // =============================
 
+function scheduleWeekRollover(){
+
+  if(weekRolloverTimer) clearTimeout(weekRolloverTimer);
+
+  const now = getServerNow();
+
+  // tìm Monday 00:00 kế tiếp (server time)
+  const day = now.getDay();
+  const diffToNextMonday = (day === 0 ? 1 : 8 - day); // nếu CN -> +1 ngày, còn lại -> tới thứ 2 tuần sau
+
+  const nextMonday = new Date(now);
+  nextMonday.setDate(now.getDate() + diffToNextMonday);
+  nextMonday.setHours(0,0,0,0);
+
+  const ms = nextMonday.getTime() - now.getTime();
+
+  weekRolloverTimer = setTimeout(async ()=>{
+    // tới mốc tuần mới: resync server time + reload dashboard (để this_week/last_week đúng)
+    await syncServerTime();
+
+    // nếu bạn muốn auto quay về This Week khi sang tuần mới:
+    currentView = "this_week";
+
+    // update UI active card
+    document.querySelectorAll(".card[data-view]").forEach(c=>c.classList.remove("active"));
+    const thisWeekCard = document.querySelector('.card[data-view="this_week"]');
+    if(thisWeekCard) thisWeekCard.classList.add("active");
+
+    await loadDashboard();
+    scheduleWeekRollover(); // schedule lần kế tiếp
+  }, ms + 50); // +50ms buffer nhỏ tránh lệch đúng 00:00:00
+}
+
+
+
+
+
 async function loadDashboard(){
 
   agentNameEl.innerText = `UID: ${agent_uid}`;
@@ -760,7 +829,11 @@ function logout(){
 
 
 // START
-loadDashboard();
+(async ()=>{
+  await syncServerTime();
+  await loadDashboard();
+  scheduleWeekRollover();
+})();
 
 setInterval(renderTable, 60000);
 
