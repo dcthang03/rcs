@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Dealer – All In One (FIX FULL)</title>
+<title>Table Counter</title>
 
 <style>
 /* ===== GLOBAL LOCK ===== */
@@ -218,7 +218,7 @@ input, button { font-size: 16px; }
 <!-- ===== LOGIN VIEW ===== -->
 <div id="loginView">
   <div id="loginBox">
-    <h3 style="margin:0 0 10px">Dealer Login</h3>
+    <h3 style="margin:0 0 10px">Table Counter</h3>
 
     <select id="tableSelect">
       <option value="">-- Chọn bàn --</option>
@@ -390,9 +390,16 @@ let TABLE_UID = null
 let pin = ''
 
 function press(n) {
-  if (pin.length >= 4) return
-  pin += n
-  updateDots()
+  if (pin.length >= 4) return;
+
+  pin += n;
+  updateDots();
+
+  // ✅ Auto login khi đủ 4 số (nếu đã chọn bàn)
+  if (pin.length === 4) {
+    const table = document.getElementById('tableSelect')?.value;
+    if (table) submitLogin();
+  }
 }
 
 function backPin() {
@@ -430,7 +437,9 @@ async function loadTables() {
   })
 }
 
-
+document.getElementById('tableSelect').addEventListener('change', () => {
+  if (pin.length === 4) submitLogin();
+});
 
 
 
