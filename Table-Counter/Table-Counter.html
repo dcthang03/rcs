@@ -206,6 +206,22 @@ input, button { font-size: 16px; }
   opacity: .4;
 }
 
+#tableNameLabel{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:1px;
+  color:rgba(255,255,255,0.35);
+
+  pointer-events:none; /* 🔥 cực quan trọng */
+  user-select:none;
+}
+
 
 
 
@@ -221,7 +237,7 @@ input, button { font-size: 16px; }
     <h3 style="margin:0 0 10px">Table Counter</h3>
 
     <select id="tableSelect">
-      <option value="">-- Chọn bàn --</option>
+      <option value="">-- table select --</option>
 
     </select>
 
@@ -256,7 +272,9 @@ input, button { font-size: 16px; }
 <div id="panelView">
     <div class="app">
         <div class="table-area">
-            <div class="table" id="table"></div>
+            <div class="table" id="table">
+              <div id="tableNameLabel"></div>
+            </div>
         </div>
 
         <div class="control-panel">
@@ -418,7 +436,7 @@ function updateDots() {
 async function loadTables() {
   const { data, error } = await sb
     .from('tables')
-    .select('table_uid')
+    .select('table_uid, table_name')
     .eq('active', true)
     .order('table_uid')
 
@@ -429,10 +447,15 @@ async function loadTables() {
 
   const select = document.getElementById('tableSelect')
 
+  while (select.options.length > 1) {
+  select.remove(1);
+  }
+
+
   data.forEach(row => {
     const opt = document.createElement('option')
     opt.value = row.table_uid        // A1
-    opt.textContent = 'Bàn ' + row.table_uid
+    opt.textContent = row.table_name
     select.appendChild(opt)
   })
 }
@@ -476,6 +499,15 @@ async function submitLogin() {
   document.getElementById('loginView').style.display = 'none'
   document.getElementById('panelView').style.display = 'block'
 
+  // 👇 SET TABLE NAME VÀO GIỮA BÀN
+const selectedOption = document
+  .getElementById('tableSelect')
+  .selectedOptions[0];
+
+document.getElementById('tableNameLabel').innerText =
+  selectedOption?.textContent || TABLE_UID;
+
+
   initPanel()
 }
 
@@ -484,8 +516,6 @@ function resetPin() {
   document.querySelectorAll('.pin-dot')
     .forEach(d => d.classList.remove('filled'))
 }
-
-
 
 
 /* ===== CONFIG ===== */
