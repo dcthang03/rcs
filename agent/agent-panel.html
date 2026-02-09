@@ -217,6 +217,11 @@ const thisWeekRakeEl = document.getElementById("thisWeekRake");
 const lastWeekRakeEl = document.getElementById("lastWeekRake");
 const agentNameEl = document.getElementById("agentName");
 
+// make Total Players clickable
+document.querySelector("#totalPlayers")
+.closest(".card")
+.setAttribute("data-view","players_state");
+
 // =============================
 // FETCH PLAYERS
 // =============================
@@ -380,16 +385,112 @@ function formatLastActivity(player){
 // RENDER
 // =============================
 
-function renderTable(){
 
-  playersBody.innerHTML = allPlayers.map(p=>`
+  function renderTable(){
+
+    const thead = document.querySelector(".table thead");
+
+if(currentView === "players_state"){
+  thead.innerHTML = `
     <tr>
-      <td>${p.player_uid}</td>
-      <td>$${p.this_week.toLocaleString()}</td>
-      <td>${formatLastActivity(p)}</td>
+      <th>Player</th>
+      <th>Status</th>
+      <th>Table</th>
     </tr>
-  `).join("");
+  `;
+}else{
+
+  const label =
+    currentView === "total"
+      ? "Total Rake"
+      : currentView === "last_week"
+      ? "Last Week"
+      : "This Week";
+
+  thead.innerHTML = `
+    <tr>
+      <th>Player ID</th>
+      <th>${label}</th>
+      <th>Last Activity</th>
+    </tr>
+  `;
 }
+
+
+  // ===== PLAYER STATE VIEW =====
+  if(currentView === "players_state"){
+
+    playersBody.innerHTML = allPlayers
+      .sort((a,b)=> b.is_online - a.is_online)
+      .map(p=>`
+        <tr>
+          <td>${p.player_uid}</td>
+          <td>
+            ${
+              p.is_online
+                ? formatDuration(p.seated_at)
+                : "💤"
+            }
+          </td>
+          <td>${p.table_position}</td>
+        </tr>
+      `).join("");
+
+    return;
+  }
+
+  // ===== RAKE VIEWS =====
+
+  playersBody.innerHTML = allPlayers.map(p=>{
+
+    let value = 0;
+
+    if(currentView === "total")
+      value = p.total_rake;
+
+    else if(currentView === "last_week")
+      value = p.last_week;
+
+    else
+      value = p.this_week;
+
+    return `
+      <tr>
+        <td>${p.player_uid}</td>
+        <td>$${value.toLocaleString()}</td>
+        <td>${formatLastActivity(p)}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+
+
+// =============================
+// CARD SWITCH VIEW
+// =============================
+
+let currentView = "this_week";
+
+document.querySelectorAll(".card[data-view]")
+.forEach(card=>{
+
+  card.addEventListener("click",()=>{
+
+    document
+      .querySelectorAll(".card[data-view]")
+      .forEach(c=>c.classList.remove("active"));
+
+    card.classList.add("active");
+
+    currentView = card.dataset.view;
+
+    renderTable();
+
+  });
+
+});
+
 
 // =============================
 // LOAD DASHBOARD
@@ -412,6 +513,13 @@ async function loadDashboard(){
   players = await attachPlayerState(players);
 
   allPlayers = players;
+
+  // TOTAL PLAYERS
+const onlineCount =
+  players.filter(p=>p.is_online).length;
+
+totalPlayersEl.innerHTML =
+  `<span style="color:#4ade80">${onlineCount}</span> / ${players.length}`;
 
   // cards
   const total = players.reduce((s,p)=>s+p.total_rake,0);
@@ -460,15 +568,39 @@ function startRealtime(){
 
       player.total_rake += rake;
 
-      if(ts >= new Date(WEEK_START)){
-        player.this_week += rake;
-      }else{
-        player.last_week += rake;
-      }
+     if(
+   ts >= new Date(WEEK_START) &&
+   ts < new Date(WEEK_END)
+){
+   player.this_week += rake;
+}else{
+   player.last_week += rake;
+}
 
       player.last_activity = log.created_at;
       player.last_rake = rake;
 
+      // ✅ UPDATE CARDS REALTIME
+totalRakeEl.innerText =
+  "$" + allPlayers
+    .reduce((s,p)=>s+p.total_rake,0)
+    .toLocaleString();
+
+thisWeekRakeEl.innerText =
+  "$" + allPlayers
+    .reduce((s,p)=>s+p.this_week,0)
+    .toLocaleString();
+
+lastWeekRakeEl.innerText =
+  "$" + allPlayers
+    .reduce((s,p)=>s+p.last_week,0)
+    .toLocaleString();
+
+renderTable();
+      
+      
+      
+      
       renderTable();
   })
   .subscribe();
