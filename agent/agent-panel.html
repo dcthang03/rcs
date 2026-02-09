@@ -8,125 +8,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Inter',sans-serif;
-}
-
-body{
-  background:#020617;
-  color:white;
-  min-height:100vh;
-}
-
-.main{
-  padding:24px;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:28px;
-}
-
-.logout{
-  padding:8px 14px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.15);
-  cursor:pointer;
-  color:#f87171;
-}
-
-.logout:hover{
-  background:rgba(248,113,113,0.1);
-}
-
-.agent-name{
-  color:#94a3b8;
-  margin-bottom:20px;
-}
-
-.footer{
-  margin-top:24px;
-  text-align:center;
-  color:#64748b;
-  font-size:12px;
-}
-
-/* CARDS */
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:16px;
-  margin-bottom:32px;
-}
-
-.card{
-  padding:18px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.06);
-}
-
-.card[data-view]{
-  cursor:pointer;
-  transition:.2s;
-}
-
-.card[data-view]:hover{
-  transform:translateY(-4px);
-}
-
-.card.active{
-  border:1px solid #4ade80;
-  background:rgba(74,222,128,0.08);
-}
-
-.card-title{
-  color:#94a3b8;
-  font-size:13px;
-}
-
-.card-value{
-  font-size:24px;
-  font-weight:600;
-  margin-top:6px;
-}
-
-/* TABLE */
-
-.section-title{
-  margin-bottom:12px;
-}
-
-.table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-.table th{
-  text-align:left;
-  padding:12px;
-  color:#94a3b8;
-  border-bottom:1px solid rgba(255,255,255,0.06);
-}
-
-.table td{
-  padding:14px 12px;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:#020617;color:white;min-height:100vh;}
+.main{padding:24px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+.logout{padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);cursor:pointer;color:#f87171;}
+.logout:hover{background:rgba(248,113,113,0.1);}
+.agent-name{color:#94a3b8;margin-bottom:20px;}
+.footer{margin-top:24px;text-align:center;color:#64748b;font-size:12px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;}
+.card{padding:18px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);}
+.card[data-view]{cursor:pointer;transition:.2s;}
+.card[data-view]:hover{transform:translateY(-4px);}
+.card.active{border:1px solid #4ade80;background:rgba(74,222,128,0.08);}
+.card-title{color:#94a3b8;font-size:13px;}
+.card-value{font-size:24px;font-weight:600;margin-top:6px;}
+.section-title{margin-bottom:12px;}
+.table{width:100%;border-collapse:collapse;}
+.table th{text-align:left;padding:12px;color:#94a3b8;border-bottom:1px solid rgba(255,255,255,0.06);}
+.table td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,0.04);}
 </style>
 </head>
 <body>
 
 <div class="main">
-
   <div class="topbar">
     <h2>Agent Panel</h2>
     <div class="logout" onclick="logout()">Logout</div>
@@ -135,7 +40,6 @@ body{
   <div class="agent-name" id="agentName"></div>
 
   <div class="cards">
-
     <div class="card">
       <div class="card-title">Total Players</div>
       <div class="card-value" id="totalPlayers">--</div>
@@ -155,12 +59,10 @@ body{
       <div class="card-title">Last Week</div>
       <div class="card-value" id="lastWeekRake">--</div>
     </div>
-
   </div>
 
   <div class="section">
     <div class="section-title">Your Players</div>
-
     <table class="table">
       <thead>
         <tr>
@@ -173,82 +75,61 @@ body{
   </div>
 
   <div class="footer">Internal System</div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-
+// =====================
 // INIT
+// =====================
 const sb = supabase.createClient(
   "https://ymtmipkmknnsqleahlmi.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltdG1pcGtta25uc3FsZWFobG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwOTU1MjUsImV4cCI6MjA4NTY3MTUyNX0.7pEza-TKBKJ_xqdBu93nLo-PRaHDcDIxW-bjZnrFJxw"
 );
 
 const agent_uid = localStorage.getItem("agent_uid");
+if(!agent_uid) window.location.href = "./agent-login.html";
 
-if(!agent_uid){
-  window.location.href = "./agent-login.html";
-}
-
+// =====================
 // STATE
+// =====================
 let allPlayers = [];
 let currentView = "this_week";
 
-let serverNow = null;          // Date (giờ server)
-let serverClockSkewMs = 0;     // serverNow - clientNow
-let weekRolloverTimer = null;  // setTimeout handle
+let serverClockSkewMs = 0;      // serverNow - clientNow
+let prodRolloverTimer = null;   // production
+let testRolloverTimer = null;   // TEST
 
+const TEST_MODE = true; // ✅ TEST: "week" = 1 phút (UTC) để test UI
 
+// =====================
 // DOM
+// =====================
 const playersBody = document.getElementById("playersBody");
 const totalPlayersEl = document.getElementById("totalPlayers");
 const totalRakeEl = document.getElementById("totalRake");
 const thisWeekRakeEl = document.getElementById("thisWeekRake");
 const lastWeekRakeEl = document.getElementById("lastWeekRake");
 const agentNameEl = document.getElementById("agentName");
-const tableMetric = document.getElementById("tableMetric");
 
 // ⭐ MAKE TOTAL PLAYERS CLICKABLE
 document.querySelector("#totalPlayers")
-.closest(".card")
-.setAttribute("data-view","players_state");
+  .closest(".card")
+  .setAttribute("data-view","players_state");
 
-
-// FETCH PLAYERS
-async function getPlayers(){
-
-  const { data, error } = await sb
-    .from("players")
-    .select("player_uid,total_rake")
-    .eq("agent_uid", agent_uid); // ⭐ QUAN TRỌNG NHẤT
-
-  if(error){
-    console.error(error);
-    return [];
-  }
-
-  return data || [];
-}
-
-// hàm lấy giờ server
-
+// =====================
+// SERVER TIME SYNC
+// =====================
 async function syncServerTime(){
   const { data, error } = await sb.rpc("get_server_now");
   if(error){
     console.error("get_server_now error:", error);
-    // fallback: nếu lỗi RPC thì dùng giờ máy, nhưng sẽ kém chính xác
-    serverNow = new Date();
     serverClockSkewMs = 0;
     return;
   }
-
-  // data thường là string ISO timestamptz
   const sNow = new Date(data);
   const cNow = new Date();
-
-  serverNow = sNow;
   serverClockSkewMs = sNow.getTime() - cNow.getTime();
 }
 
@@ -256,12 +137,27 @@ function getServerNow(){
   return new Date(Date.now() + serverClockSkewMs);
 }
 
+// =====================
+// FETCH PLAYERS
+// =====================
+async function getPlayers(){
+  const { data, error } = await sb
+    .from("players")
+    .select("player_uid,total_rake")
+    .eq("agent_uid", agent_uid);
 
-// WEEK RANGE
+  if(error){
+    console.error(error);
+    return [];
+  }
+  return data || [];
+}
+
+// =====================
+// WEEK RANGE (PROD)
+// =====================
 function getWeekRange(offset = 0, baseDate = null){
-
   const now = baseDate ? new Date(baseDate) : getServerNow();
-
   const day = now.getDay(); // 0=Sun..6=Sat
   const diffToMonday = (day === 0 ? -6 : 1 - day);
 
@@ -276,14 +172,40 @@ function getWeekRange(offset = 0, baseDate = null){
   return { start: monday, end: sunday };
 }
 
+// =====================
+// TEST RANGE (UTC minute)
+// Requires RPC: get_test_week_ranges_utc() returning timestamptz in jsonb
+// =====================
+async function getTestRangesUTC(){
+  const { data, error } = await sb.rpc("get_test_week_ranges_utc");
+  if(error){
+    console.error("get_test_week_ranges_utc error:", error);
+    return null;
+  }
+  return {
+    utc_now: new Date(data.utc_now),
+    this_start: new Date(data.this_week_start),
+    this_end: new Date(data.this_week_end),
+    last_start: new Date(data.last_week_start),
+    last_end: new Date(data.last_week_end),
+  };
+}
 
+function scheduleTestRolloverUTC(nextUTCDate){
+  if(testRolloverTimer) clearTimeout(testRolloverTimer);
 
-// =============================
+  // ✅ canh theo giờ server (skew) để bám DB tốt hơn
+  const ms = nextUTCDate.getTime() - getServerNow().getTime();
+
+  testRolloverTimer = setTimeout(async ()=>{
+    await loadDashboard(); // reload để UI nhảy phút mới
+  }, Math.max(80, ms + 30));
+}
+
+// =====================
 // ATTACH WEEKLY RAKE
-// =============================
-
+// =====================
 async function attachWeeklyRake(players){
-
   const { data, error } = await sb
     .from("rake_logs")
     .select("player_uid,rake,created_at")
@@ -294,52 +216,59 @@ async function attachWeeklyRake(players){
     return players;
   }
 
-const base = getServerNow();
-const thisWeek = getWeekRange(0, base);
-const lastWeek = getWeekRange(-1, base);
+  let thisWeek, lastWeek;
+
+  if(TEST_MODE){
+    const r = await getTestRangesUTC();
+    if(r){
+      const nextMinute = new Date(r.this_start.getTime() + 60_000);
+      scheduleTestRolloverUTC(nextMinute);
+
+      thisWeek = { start: r.this_start, end: r.this_end };
+      lastWeek = { start: r.last_start, end: r.last_end };
+    }else{
+      // fallback
+      const base = getServerNow();
+      thisWeek = getWeekRange(0, base);
+      lastWeek = getWeekRange(-1, base);
+    }
+  }else{
+    const base = getServerNow();
+    thisWeek = getWeekRange(0, base);
+    lastWeek = getWeekRange(-1, base);
+  }
 
   const map = {};
-
   players.forEach(p=>{
     p.this_week = 0;
     p.last_week = 0;
-
     p.last_activity = null;
     p.last_rake = 0;
-
     map[p.player_uid] = p;
   });
 
   data?.forEach(log=>{
-
     const player = map[log.player_uid];
     if(!player) return;
 
     const date = new Date(log.created_at);
 
-    if(date >= thisWeek.start && date <= thisWeek.end)
-      player.this_week += Number(log.rake);
-
-    if(date >= lastWeek.start && date <= lastWeek.end)
-      player.last_week += Number(log.rake);
+    if(date >= thisWeek.start && date <= thisWeek.end) player.this_week += Number(log.rake);
+    if(date >= lastWeek.start && date <= lastWeek.end) player.last_week += Number(log.rake);
 
     if(!player.last_activity || date > new Date(player.last_activity)){
       player.last_activity = log.created_at;
       player.last_rake = Number(log.rake);
     }
-
   });
 
   return players;
 }
 
-
-// =============================
-// ⭐ ATTACH PLAYER STATE + NOTE
-// =============================
-
+// =====================
+// ATTACH PLAYER STATE + NOTE
+// =====================
 async function attachPlayerState(players){
-
   const { data: seats } = await sb
     .from("seats")
     .select("player_uid,table_uid,seat_number,seated_at")
@@ -353,25 +282,20 @@ async function attachPlayerState(players){
   const seatMap = {};
   const noteMap = {};
 
-  notes?.forEach(n => {
-    noteMap[String(n.player_uid)] = n.note;
-  });
+  notes?.forEach(n => noteMap[String(n.player_uid)] = n.note);
 
   seats?.forEach(seat=>{
     if(seat.player_uid){
       const uid = String(seat.player_uid);
       seatMap[uid] = {
         table: `${seat.table_uid}-${seat.seat_number}`,
-        online: true,
         seated_at: seat.seated_at
       };
     }
   });
 
   players.forEach(p=>{
-
     const seatData = seatMap[String(p.player_uid)];
-
     p.is_online = Boolean(seatData);
     p.table_position = seatData?.table || "-";
     p.seated_at = seatData?.seated_at || null;
@@ -381,21 +305,76 @@ async function attachPlayerState(players){
   return players;
 }
 
+// =====================
+// SAVE NOTE (UPSERT)
+// =====================
+async function saveNote(player_uid, note){
+  await sb
+    .from("agent_player_notes")
+    .upsert({ agent_uid, player_uid, note }, { onConflict:"agent_uid,player_uid" });
+}
 
-// Function PRO
+// =====================
+// UI HELPERS
+// =====================
+function formatLastActivity(player){
+  if(!player.last_activity) return "-";
+
+  const diffMin = (Date.now() - new Date(player.last_activity)) / 60000;
+  if(diffMin >= 120) return "-";
+
+  const amount = `+$${Number(player.last_rake||0).toLocaleString()}`;
+  const time = new Date(player.last_activity).toLocaleTimeString('en-GB', {
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+
+  return `${amount} ${time}`;
+}
+
+function formatDuration(seatedAt){
+  if(!seatedAt) return "-";
+
+  const diff = (Date.now() - new Date(seatedAt)) / 60000;
+
+  let color = "#4ade80";
+  if(diff > 60) color = "#fbbf24";
+  if(diff > 120) color = "#f87171";
+
+  const h = Math.floor(diff / 60);
+  const m = Math.floor(diff % 60);
+
+  return `<span style="color:${color}">${h}h ${m}m</span>`;
+}
+
+function updateSeatTimers(){
+  if(currentView !== "players_state") return;
+
+  document.querySelectorAll("tbody tr").forEach(row=>{
+    const uid = row.dataset.uid;
+    const player = allPlayers.find(p => String(p.player_uid) === uid);
+    if(!player) return;
+
+    const cell = row.children[1];
+    cell.innerHTML = player.is_online
+      ? formatDuration(player.seated_at)
+      : `<span style="color:#64748b">💤</span>`;
+  });
+}
+setInterval(updateSeatTimers, 1000);
+
+// =====================
+// SEAT REALTIME (batched refresh)
+// =====================
 const seatRefreshQueue = new Set();
 let seatRefreshTimer = null;
 
 function queueSeatRefresh(uid){
-
   if(!uid) return;
 
   seatRefreshQueue.add(String(uid));
-
   if(seatRefreshTimer) return;
 
   seatRefreshTimer = setTimeout(async ()=>{
-
     const uids = [...seatRefreshQueue];
     seatRefreshQueue.clear();
     seatRefreshTimer = null;
@@ -411,20 +390,13 @@ function queueSeatRefresh(uid){
     }
 
     const seatMap = {};
-    data?.forEach(s=>{
-      seatMap[String(s.player_uid)] = s;
-    });
+    data?.forEach(s => seatMap[String(s.player_uid)] = s);
 
     uids.forEach(uid=>{
-
-      const player = allPlayers.find(
-        p => String(p.player_uid) === uid
-      );
-
+      const player = allPlayers.find(p => String(p.player_uid) === uid);
       if(!player) return;
 
       const seat = seatMap[uid];
-
       if(seat){
         player.is_online = true;
         player.table_position = `${seat.table_uid}-${seat.seat_number}`;
@@ -434,119 +406,22 @@ function queueSeatRefresh(uid){
         player.table_position = "-";
         player.seated_at = null;
       }
-
     });
 
     const onlineCount = allPlayers.filter(p=>p.is_online).length;
-
     totalPlayersEl.innerHTML =
       `<span style="color:#4ade80">${onlineCount}</span> / ${allPlayers.length}`;
 
     renderTable();
-
   }, 120);
 }
 
-
-// =============================
-// SAVE NOTE (UPSERT)
-// =============================
-
-async function saveNote(player_uid, note){
-
-  await sb
-    .from("agent_player_notes")
-    .upsert({
-      agent_uid,
-      player_uid,
-      note
-    },{
-      onConflict:"agent_uid,player_uid"
-    });
-}
-
-
-// ====== ✅ LAST ACTIVITY: +$rake HH:mm:ss (24h) ======
-
-function formatLastActivity(player){
-
-  if(!player.last_activity) return "-";
-
-  const diffMin = (Date.now() - new Date(player.last_activity)) / 60000;
-
-  // quá 2h thì ẩn
-  if(diffMin >= 120) return "-";
-
-  const amount = `+$${Number(player.last_rake||0).toLocaleString()}`;
-
-  const time = new Date(player.last_activity).toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-
-  return `${amount} ${time}`;
-}
-
-
-// Bộ đếm thời gian ngồi 
-function formatDuration(seatedAt){
-
-  if(!seatedAt) return "-";
-
-  const diff =
-    (Date.now() - new Date(seatedAt)) / 60000;
-
-  let color = "#4ade80";
-
-  if(diff > 60) color = "#fbbf24";
-  if(diff > 120) color = "#f87171";
-
-  const h = Math.floor(diff / 60);
-  const m = Math.floor(diff % 60);
-
-  return `<span style="color:${color}">
-            ${h}h ${m}m
-          </span>`;
-}
-
-function updateSeatTimers(){
-
-  if(currentView !== "players_state") return;
-
-  document
-    .querySelectorAll("tbody tr")
-    .forEach(row=>{
-
-      const uid = row.dataset.uid;
-
-      const player = allPlayers.find(
-        p => String(p.player_uid) === uid
-      );
-
-      if(!player) return;
-
-      const cell = row.children[1];
-
-      cell.innerHTML = player.is_online
-        ? formatDuration(player.seated_at)
-        : `<span style="color:#64748b">💤</span>`;
-    });
-}
-
-setInterval(updateSeatTimers, 1000);
-
-
-// =============================
-// ⭐ RENDER TABLE (MULTI MODE)
-// =============================
-
+// =====================
+// RENDER TABLE
+// =====================
 function renderTable(){
-
-  // PLAYER STATE MODE Total Players
+  // PLAYER STATE MODE
   if(currentView === "players_state"){
-
     document.querySelector(".table thead").innerHTML = `
       <tr>
         <th>Player</th>
@@ -569,14 +444,11 @@ function renderTable(){
           }
         </td>
         <td>
-          ${p.table_position === "-" 
-            ? "-"
-            : `<span style="color:#4ade80;font-weight:600">${p.table_position}</span>`
-          }
-        </td>    
+          ${p.table_position === "-" ? "-" : `<span style="color:#4ade80;font-weight:600">${p.table_position}</span>`}
+        </td>
         <td>
-          <input 
-            value="${p.note || ""}"
+          <input
+            value="${(p.note||"").replace(/"/g,"&quot;")}"
             onchange="saveNote('${p.player_uid}', this.value)"
             style="
               background:transparent;
@@ -590,18 +462,14 @@ function renderTable(){
         </td>
       </tr>
     `).join("");
-
     return;
   }
 
-
   // RAKE MODES
   const metricText =
-    currentView === "total"
-      ? "Total Rake"
-      : currentView === "this_week"
-      ? "This Week"
-      : "Last Week";
+    currentView === "total" ? "Total Rake" :
+    currentView === "this_week" ? (TEST_MODE ? "This Minute" : "This Week") :
+    (TEST_MODE ? "Last Minute" : "Last Week");
 
   document.querySelector(".table thead").innerHTML = `
     <tr>
@@ -612,45 +480,26 @@ function renderTable(){
   `;
 
   const sorted = [...allPlayers].sort((a,b)=>{
-
-    if(currentView === "total")
-      return (b.total_rake||0)-(a.total_rake||0);
-
-    if(currentView === "this_week")
-      return (b.this_week||0)-(a.this_week||0);
-
+    if(currentView === "total") return (b.total_rake||0)-(a.total_rake||0);
+    if(currentView === "this_week") return (b.this_week||0)-(a.this_week||0);
     return (b.last_week||0)-(a.last_week||0);
   });
 
   playersBody.innerHTML = sorted.map(p=>{
-
     const value =
-      currentView === "total"
-        ? p.total_rake
-        : currentView === "this_week"
-        ? p.this_week
-        : p.last_week;
+      currentView === "total" ? p.total_rake :
+      currentView === "this_week" ? p.this_week :
+      p.last_week;
 
-    const isLive =
-      p.last_activity &&
-      (Date.now() - new Date(p.last_activity)) < 5000;
+    const isLive = p.last_activity && (Date.now() - new Date(p.last_activity)) < 5000;
 
     return `
-      <tr style="${
-        isLive
-          ? 'background:rgba(74,222,128,0.18);transition:.3s;'
-          : ''
-      }">
+      <tr style="${isLive ? 'background:rgba(74,222,128,0.18);transition:.3s;' : ''}">
         <td>${p.player_uid}</td>
         <td>$${Number(value||0).toLocaleString()}</td>
-
         ${
           currentView !== "last_week"
-            ? `
-              <td style="color:#4ade80;font-weight:600;width:170px;">
-                ${formatLastActivity(p)}
-              </td>
-            `
+            ? `<td style="color:#4ade80;font-weight:600;width:170px;">${formatLastActivity(p)}</td>`
             : ""
         }
       </tr>
@@ -658,65 +507,30 @@ function renderTable(){
   }).join("");
 }
 
-
-// =============================
+// =====================
 // DASHBOARD
-// =============================
-
-function scheduleWeekRollover(){
-
-  if(weekRolloverTimer) clearTimeout(weekRolloverTimer);
-
-  const now = getServerNow();
-
-  // tìm Monday 00:00 kế tiếp (server time)
-  const day = now.getDay();
-  const diffToNextMonday = (day === 0 ? 1 : 8 - day); // nếu CN -> +1 ngày, còn lại -> tới thứ 2 tuần sau
-
-  const nextMonday = new Date(now);
-  nextMonday.setDate(now.getDate() + diffToNextMonday);
-  nextMonday.setHours(0,0,0,0);
-
-  const ms = nextMonday.getTime() - now.getTime();
-
-  weekRolloverTimer = setTimeout(async ()=>{
-    // tới mốc tuần mới: resync server time + reload dashboard (để this_week/last_week đúng)
-    await syncServerTime();
-
-    // nếu bạn muốn auto quay về This Week khi sang tuần mới:
-    currentView = "this_week";
-
-    // update UI active card
-    document.querySelectorAll(".card[data-view]").forEach(c=>c.classList.remove("active"));
-    const thisWeekCard = document.querySelector('.card[data-view="this_week"]');
-    if(thisWeekCard) thisWeekCard.classList.add("active");
-
-    await loadDashboard();
-    scheduleWeekRollover(); // schedule lần kế tiếp
-  }, ms + 50); // +50ms buffer nhỏ tránh lệch đúng 00:00:00
-}
-
-
-
-
-
+// =====================
 async function loadDashboard(){
+  if(TEST_MODE){
+    const c1 = document.querySelector('[data-view="this_week"] .card-title');
+    const c2 = document.querySelector('[data-view="last_week"] .card-title');
+    if(c1) c1.innerText = "This Minute (TEST)";
+    if(c2) c2.innerText = "Last Minute (TEST)";
+  }
 
   agentNameEl.innerText = `UID: ${agent_uid}`;
 
   let players = await getPlayers();
-
   players = await attachWeeklyRake(players);
   players = await attachPlayerState(players);
 
   allPlayers = players;
 
   const onlineCount = players.filter(p => p.is_online === true).length;
-
   totalPlayersEl.innerHTML =
     onlineCount > 0
-      ? `<span style="color:#4ade80"> ${onlineCount}</span> / ${players.length}`
-      : `<span style="color:#9ca3af"> 0 </span> / ${players.length}`;
+      ? `<span style="color:#4ade80">${onlineCount}</span> / ${players.length}`
+      : `<span style="color:#9ca3af">0</span> / ${players.length}`;
 
   const total = players.reduce((s,p)=>s+(p.total_rake||0),0);
   const thisWeek = players.reduce((s,p)=>s+(p.this_week||0),0);
@@ -729,8 +543,9 @@ async function loadDashboard(){
   renderTable();
 }
 
-
-// Realtime listerner bảng rake_logs
+// =====================
+// REALTIME: rake_logs
+// =====================
 sb.channel('rake-live')
 .on(
   'postgres_changes',
@@ -741,13 +556,14 @@ sb.channel('rake-live')
     filter: `agent_uid=eq.${agent_uid}`
   },
   payload => {
+    if(TEST_MODE){
+      // ✅ test mode: reload để đảm bảo vào đúng "minute boundary"
+      loadDashboard();
+      return;
+    }
 
     const log = payload.new;
-
-    const player = allPlayers.find(
-      p => p.player_uid === log.player_uid
-    );
-
+    const player = allPlayers.find(p => p.player_uid === log.player_uid);
     if(!player) return;
 
     const rake = Number(log.rake);
@@ -755,90 +571,65 @@ sb.channel('rake-live')
     player.this_week += rake;
     player.total_rake += rake;
 
-    // ⭐ update last activity ngay lập tức
     player.last_activity = log.created_at;
     player.last_rake = rake;
 
     thisWeekRakeEl.innerText =
-      "$" + allPlayers
-        .reduce((s,p)=>s+(p.this_week||0),0)
-        .toLocaleString();
+      "$" + allPlayers.reduce((s,p)=>s+(p.this_week||0),0).toLocaleString();
 
     totalRakeEl.innerText =
-      "$" + allPlayers
-        .reduce((s,p)=>s+(p.total_rake||0),0)
-        .toLocaleString();
+      "$" + allPlayers.reduce((s,p)=>s+(p.total_rake||0),0).toLocaleString();
 
     renderTable();
   }
 )
 .subscribe();
 
-
-// realtime listener bảng seats
+// =====================
+// REALTIME: seats
+// =====================
 sb.channel('seats-live')
 .on(
   'postgres_changes',
-  {
-    event:'*',
-    schema:'public',
-    table:'seats'
-  },
+  { event:'*', schema:'public', table:'seats' },
   payload => {
-
-    const uid =
-      payload.new?.player_uid ||
-      payload.old?.player_uid;
-
-    if(uid){
-      queueSeatRefresh(uid);
-    }
+    const uid = payload.new?.player_uid || payload.old?.player_uid;
+    if(uid) queueSeatRefresh(uid);
   }
 )
 .subscribe();
 
-
-// =============================
+// =====================
 // CLICKABLE CARDS
-// =============================
-
-document.querySelectorAll(".card[data-view]")
-.forEach(card=>{
-
+// =====================
+document.querySelectorAll(".card[data-view]").forEach(card=>{
   card.addEventListener("click",()=>{
-
-    document
-      .querySelectorAll(".card[data-view]")
-      .forEach(c=>c.classList.remove("active"));
-
+    document.querySelectorAll(".card[data-view]").forEach(c=>c.classList.remove("active"));
     card.classList.add("active");
-
     currentView = card.dataset.view;
-
     renderTable();
   });
-
 });
 
-
+// =====================
 // LOGOUT
+// =====================
 function logout(){
   localStorage.removeItem("agent_uid");
   window.location.href = "./agent-login.html";
 }
 
-
+// =====================
 // START
+// =====================
 (async ()=>{
   await syncServerTime();
   await loadDashboard();
-  scheduleWeekRollover();
+  // ✅ TEST_MODE không dùng production rollover
 })();
 
 setInterval(renderTable, 60000);
-
 </script>
-
 
 </body>
 </html>
