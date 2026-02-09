@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  background:#020617;
+  color:white;
+  min-height:100vh;
+}
+
+.main{
+  padding:24px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:28px;
+}
+
+.logout{
+  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.15);
+  cursor:pointer;
+  color:#f87171;
+}
+
+.agent-name{
+  color:#94a3b8;
+  margin-bottom:20px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;
+  margin-bottom:32px;
+}
+
+.card{
+  padding:18px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.06);
+}
+
+.card[data-view]{
+  cursor:pointer;
+}
+
+.card.active{
+  border:1px solid #4ade80;
+  background:rgba(74,222,128,0.08);
+}
+
+.card-title{
+  color:#94a3b8;
+  font-size:13px;
+}
+
+.card-value{
+  font-size:24px;
+  font-weight:600;
+  margin-top:6px;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.table th{
+  text-align:left;
+  padding:12px;
+  color:#94a3b8;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+.table td{
+  padding:14px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+
+/* FLASH */
+
+@keyframes rakeFlash{
+  0%{ background:rgba(34,197,94,0.6); }
+  100%{ background:transparent; }
+}
+
+.rake-flash{
+  animation:rakeFlash 3s ease;
+}
+
+</style>
+</head>
+<body>
+
+<div class="main">
+
+  <div class="topbar">
+    <h2>Agent Panel</h2>
+    <div class="logout" onclick="logout()">Logout</div>
+  </div>
+
+  <div class="agent-name" id="agentName"></div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-title">Total Players</div>
+      <div class="card-value" id="totalPlayers">--</div>
+    </div>
+
+    <div class="card" data-view="total">
+      <div class="card-title">Total Rake</div>
+      <div class="card-value" id="totalRake">--</div>
+    </div>
+
+    <div class="card active" data-view="this_week">
+      <div class="card-title">This Week</div>
+      <div class="card-value" id="thisWeekRake">--</div>
+    </div>
+
+    <div class="card" data-view="last_week">
+      <div class="card-title">Last Week</div>
+      <div class="card-value" id="lastWeekRake">--</div>
+    </div>
+
+  </div>
+
+  <table class="table">
+    <thead></thead>
+    <tbody id="playersBody"></tbody>
+  </table>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const sb = supabase.createClient(
+  "https://ymtmipkmknnsqleahlmi.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltdG1pcGtta25uc3FsZWFobG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwOTU1MjUsImV4cCI6MjA4NTY3MTUyNX0.7pEza-TKBKJ_xqdBu93nLo-PRaHDcDIxW-bjZnrFJxw"
+);
+
+const agent_uid = localStorage.getItem("agent_uid");
+if(!agent_uid) window.location.href="./agent-login.html";
+
+let allPlayers=[];
+let currentView="this_week";
+
+let WEEK_START, LAST_WEEK_START, WEEK_END;
+
+const playersBody=document.getElementById("playersBody");
+const totalPlayersEl=document.getElementById("totalPlayers");
+const totalRakeEl=document.getElementById("totalRake");
+const thisWeekRakeEl=document.getElementById("thisWeekRake");
+const lastWeekRakeEl=document.getElementById("lastWeekRake");
+const agentNameEl=document.getElementById("agentName");
+
+document.querySelector("#totalPlayers")
+.closest(".card")
+.setAttribute("data-view","players_state");
+
+/* =========================
+FETCH
+========================= */
+
+async function getPlayers(){
+  const {data}=await sb
+    .from("players")
+    .select("player_uid,total_rake")
+    .eq("agent_uid",agent_uid);
+
+  return data||[];
+}
+
+async function attachWeeklyRake(players){
+
+  const {data}=await sb
+    .from("rake_logs")
+    .select("player_uid,rake,created_at")
+    .eq("agent_uid",agent_uid)
+    .gte("created_at",LAST_WEEK_START)
+    .lt("created_at",WEEK_END);
+
+  const map={};
+
+  players.forEach(p=>{
+    p.this_week=0;
+    p.last_week=0;
+    p.last_activity=null;
+    p.last_rake=0;
+    map[p.player_uid]=p;
+  });
+
+  data?.forEach(log=>{
+    const p=map[log.player_uid];
+    if(!p) return;
+
+    const rake=Number(log.rake);
+    const ts=new Date(log.created_at);
+
+    if(ts>=new Date(WEEK_START))
+      p.this_week+=rake;
+    else
+      p.last_week+=rake;
+
+    if(!p.last_activity || ts>new Date(p.last_activity)){
+      p.last_activity=log.created_at;
+      p.last_rake=rake;
+    }
+  });
+
+  return players;
+}
+
+/* =========================
+RENDER
+========================= */
+
+function renderTable(){
+
+  const thead=document.querySelector(".table thead");
+
+  if(currentView==="last_week"){
+    thead.innerHTML=`
+      <tr>
+        <th>Player ID</th>
+        <th>Last Week</th>
+      </tr>`;
+  }else if(currentView==="players_state"){
+    thead.innerHTML=`
+      <tr>
+        <th>Player</th>
+        <th>Status</th>
+      </tr>`;
+  }else{
+    const label=currentView==="total"
+      ?"Total Rake":"This Week";
+
+    thead.innerHTML=`
+      <tr>
+        <th>Player ID</th>
+        <th>${label}</th>
+        <th>Last Activity</th>
+      </tr>`;
+  }
+
+  playersBody.innerHTML=allPlayers.map(p=>{
+
+    let value=
+      currentView==="total"
+      ?p.total_rake
+      :currentView==="last_week"
+      ?p.last_week
+      :p.this_week;
+
+    if(currentView==="last_week"){
+      return `
+      <tr data-uid="${p.player_uid}">
+        <td>${p.player_uid}</td>
+        <td class="rake">$${value.toLocaleString()}</td>
+      </tr>`;
+    }
+
+    return `
+    <tr data-uid="${p.player_uid}">
+      <td>${p.player_uid}</td>
+      <td class="rake">$${value.toLocaleString()}</td>
+      <td>${p.last_activity
+        ?"+$"+p.last_rake
+        :"–"}</td>
+    </tr>`;
+  }).join("");
+}
+
+/* =========================
+PATCH ROW (NO RE-RENDER)
+========================= */
+
+function patchRakeRow(player){
+
+  const row=document.querySelector(
+    `tr[data-uid="${player.player_uid}"]`
+  );
+  if(!row) return;
+
+  const cell=row.querySelector(".rake");
+
+  let value=
+    currentView==="total"
+      ?player.total_rake
+      :currentView==="last_week"
+      ?player.last_week
+      :player.this_week;
+
+  cell.textContent="$"+value.toLocaleString();
+
+  cell.classList.remove("rake-flash");
+  void cell.offsetWidth;
+  cell.classList.add("rake-flash");
+}
+
+/* =========================
+REALTIME (SINGLE CHANNEL)
+========================= */
+
+function startRealtime(){
+
+  sb.removeAllChannels();
+
+  sb.channel("agent-live")
+  .on('postgres_changes',{
+    event:'INSERT',
+    schema:'public',
+    table:'rake_logs',
+    filter:`agent_uid=eq.${agent_uid}`
+  },payload=>{
+
+    const log=payload.new;
+    const player=allPlayers.find(
+      p=>p.player_uid===log.player_uid
+    );
+    if(!player) return;
+
+    const rake=Number(log.rake);
+    const ts=new Date(log.created_at);
+
+    player.total_rake+=rake;
+
+    if(ts>=new Date(WEEK_START))
+      player.this_week+=rake;
+    else
+      player.last_week+=rake;
+
+    player.last_activity=log.created_at;
+    player.last_rake=rake;
+
+    updateCards();
+    patchRakeRow(player);
+
+  }).subscribe();
+}
+
+/* ========================= */
+
+function updateCards(){
+
+  const total=allPlayers.reduce((s,p)=>s+p.total_rake,0);
+  const thisWeek=allPlayers.reduce((s,p)=>s+p.this_week,0);
+  const lastWeek=allPlayers.reduce((s,p)=>s+p.last_week,0);
+
+  totalRakeEl.innerText="$"+total.toLocaleString();
+  thisWeekRakeEl.innerText="$"+thisWeek.toLocaleString();
+  lastWeekRakeEl.innerText="$"+lastWeek.toLocaleString();
+}
+
+/* =========================
+LOAD
+========================= */
+
+async function loadDashboard(){
+
+  const {data}=await sb.rpc('get_week_range');
+
+  WEEK_START=data[0].start_this_week;
+  LAST_WEEK_START=data[0].start_last_week;
+  WEEK_END=data[0].end_this_week;
+
+  agentNameEl.innerText=`UID: ${agent_uid}`;
+
+  let players=await getPlayers();
+  players=await attachWeeklyRake(players);
+
+  allPlayers=players;
+
+  totalPlayersEl.innerText=players.length;
+
+  updateCards();
+  renderTable();
+  startRealtime();
+}
+
+/* =========================
+VIEW SWITCH
+========================= */
+
+document.querySelectorAll(".card[data-view]")
+.forEach(card=>{
+  card.addEventListener("click",()=>{
+
+    document.querySelectorAll(".card")
+      .forEach(c=>c.classList.remove("active"));
+
+    card.classList.add("active");
+
+    currentView=card.dataset.view;
+    renderTable();
+  });
+});
+
+loadDashboard();
+
+</script>
+</body>
+</html>
