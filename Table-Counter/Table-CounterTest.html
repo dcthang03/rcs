@@ -552,25 +552,43 @@ function updateDots() {
 }
 
 async function loadTables() {
-  const { data, error } = await sb
-    .from('tables')
-    .select('table_uid, table_name')
-    .eq('active', true)
-    .order('table_uid')
+  try {
+    const { data, error } = await sb
+      .from('tables')
+      .select('table_uid, table_name')
+      .eq('active', true)
+      .order('table_uid');
 
-  if (error) return alert('Không load được danh sách bàn')
+    if (error) {
+      console.error("loadTables error:", error);
+      alert("Không load được danh sách bàn: " + (error.message || "unknown"));
+      return;
+    }
 
-  const select = document.getElementById('tableSelect')
-  while (select.options.length > 1) select.remove(1)
+    const select = document.getElementById('tableSelect');
+    while (select.options.length > 1) select.remove(1);
 
-  (data || []).forEach(row => {
-    const name = (row.table_name || '').trim()
-    const opt = document.createElement('option')
-    opt.value = row.table_uid
-    opt.textContent = name ? name : row.table_uid
-    select.appendChild(opt)
-  })
+    (data || []).forEach(row => {
+      const name = (row.table_name || '').trim();
+      const opt = document.createElement('option');
+      opt.value = row.table_uid;
+      opt.textContent = name ? name : row.table_uid;
+      select.appendChild(opt);
+    });
+
+    if (!data?.length) {
+      alert("Không có bàn active=true hoặc bị chặn quyền đọc (RLS).");
+    }
+  } catch (e) {
+    console.error("loadTables exception:", e);
+    alert("Không load được danh sách bàn (exception). Mở Console xem lỗi.");
+  }
 }
+
+
+
+
+
 
 document.getElementById('tableSelect').addEventListener('change', () => {
   if (pin.length === 4) submitLogin();
