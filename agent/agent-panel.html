@@ -76,7 +76,56 @@ body{background:#020617;color:white;min-height:100vh;}
 .table-slot.online{ color:#4ade80; font-weight:600; }
 .table-slot.offline{ color:#64748b; }
 
+/* ===== RIVEBASE BRAND (panel topbar) — additive ===== */
+.brandbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
 
+.rb-logo{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  flex:0 0 auto;
+  background:
+    radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.55), transparent 60%),
+    linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,211,238,.85));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 12px 35px rgba(124,58,237,.18);
+}
+
+.brandtext{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.brandname{
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:.2px;
+  line-height:1.1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.brandtag{
+  font-size:12px;
+  color:#94a3b8;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Mobile: ẩn tagline để không vỡ topbar */
+@media (max-width:420px){
+  .brandtag{display:none;}
+}
 
 
 </style>
@@ -85,9 +134,17 @@ body{background:#020617;color:white;min-height:100vh;}
 
 <div class="main">
   <div class="topbar">
-    <h2>Agent Panel</h2>
-    <div class="logout" onclick="logout()">Logout</div>
+  <div class="brandbar">
+    <div class="rb-logo" aria-hidden="true"></div>
+    <div class="brandtext">
+      <div class="brandname">Rivebase</div>
+      <div class="brandtag">Realtime Rake Counter System</div>
+    </div>
   </div>
+
+  <div class="logout" onclick="logout()">Logout</div>
+</div>
+
 
   <div class="agent-name" id="agentName"></div>
 
@@ -131,7 +188,7 @@ body{background:#020617;color:white;min-height:100vh;}
     </table>
   </div>
 
-  <div class="footer">Internal System</div>
+  <div class="footer">© 2026 Rivebase • Internal Operations</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

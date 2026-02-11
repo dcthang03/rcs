@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rivebase Docs — Hướng dẫn kỹ thuật</title>
+
+  <style>
+    :root{
+      --bg:#070A12;
+      --txt:#EAF0FF;
+      --muted: rgba(234,240,255,.68);
+      --line: rgba(255,255,255,.12);
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --radius: 16px;
+      --max: 1180px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--txt);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.30), transparent 55%),
+        radial-gradient(900px 600px at 90% 0%, rgba(34,211,238,.18), transparent 55%),
+        var(--bg);
+    }
+    a{color:inherit;text-decoration:none}
+    code,kbd,pre{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .wrap{max-width:var(--max); margin:0 auto; padding:18px}
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:14px 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+      position:sticky; top:12px; z-index:10;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; font-weight:800;
+    }
+    .logo{
+      width:34px;height:34px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,211,238,.85));
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .top small{display:block; font-weight:650; color:var(--muted)}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color:var(--txt);
+      font-weight:700;
+      font-size:14px;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22)}
+    .btn.primary{
+      background:#fff; color:#0A0F1F; border-color:rgba(255,255,255,.30);
+    }
+    .btn.primary:hover{background: rgba(255,255,255,.92)}
+
+    .layout{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:14px;
+      margin-top:14px;
+      align-items:start;
+    }
+    .side{
+      position:sticky; top:92px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      padding:12px;
+      height: calc(100vh - 110px);
+      overflow:auto;
+    }
+    .side h3{margin:8px 8px 10px; font-size:14px; color:rgba(234,240,255,.85)}
+    .nav a{
+      display:block;
+      padding:10px 10px;
+      border-radius: 14px;
+      color: var(--muted);
+      border:1px solid transparent;
+      font-size:14px;
+    }
+    .nav a:hover{
+      color:var(--txt);
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.10);
+    }
+    .content{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      padding:18px;
+    }
+    .content h1{
+      margin:0 0 10px;
+      font-size:28px;
+      letter-spacing:-.3px;
+    }
+    .content p{margin:10px 0; color:var(--muted); line-height:1.7; font-size:14.5px}
+    .callout{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding:12px 12px;
+      margin:12px 0;
+      color: rgba(234,240,255,.78);
+      font-size:14px;
+      line-height:1.65;
+    }
+    .grid2{
+      display:grid; grid-template-columns: 1fr 1fr; gap:12px;
+      margin:12px 0;
+    }
+    .card{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding:12px;
+    }
+    .card b{display:block; margin-bottom:6px}
+    pre{
+      margin:10px 0;
+      padding:12px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:auto;
+      font-size:13px;
+      line-height:1.6;
+      color: rgba(234,240,255,.92);
+    }
+    .hr{height:1px;background:rgba(255,255,255,.10); margin:18px 0}
+    .kbd{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color: rgba(234,240,255,.86);
+      font-size:12px;
+    }
+    .qa details{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 16px;
+      padding:12px;
+      margin:10px 0;
+    }
+    .qa summary{cursor:pointer; font-weight:750}
+    .qa p{margin:8px 0 0}
+    .foot{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+    }
+
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr}
+      .side{position:relative; top:auto; height:auto}
+      .top{position:relative; top:auto}
+      .grid2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="brand" href="index.html">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          Rivebase Docs
+          <small>Hướng dẫn kỹ thuật & vận hành</small>
+        </div>
+      </a>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn" href="index.html">← Back to Home</a>
+        <button class="btn primary" id="copyLinkBtn">Copy link mục hiện tại</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="side">
+        <h3>Navigation</h3>
+        <nav class="nav">
+          <a href="#intro">1. Tổng quan</a>
+          <a href="#roles">2. Role & quyền</a>
+          <a href="#setup">3. Checklist triển khai</a>
+          <a href="#data">4. Quy ước dữ liệu</a>
+          <a href="#realtime">5. Realtime & sự kiện</a>
+          <a href="#security">6. Security (PROD/STAGING)</a>
+          <a href="#ops">7. Quy trình vận hành</a>
+          <a href="#trouble">8. Troubleshooting</a>
+          <a href="#faq">9. FAQ</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <h1 id="intro">Tài liệu kỹ thuật Rivebase</h1>
+        <p>
+          Mục tiêu: triển khai nhanh, ít bug, dễ training, và dữ liệu đủ chuẩn để đối soát.
+          Docs này viết theo hướng “checklist + quy ước”, giúp bạn/đội dev bám theo là chạy.
+        </p>
+
+        <div class="callout">
+          <b>Khuyến nghị:</b> triển khai theo 2 môi trường <span class="kbd">STAGING</span> (test) và <span class="kbd">PROD</span> (live).
+          Mọi thay đổi phải test trên STAGING trước, sau đó mới release.
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 id="roles">2) Role & quyền</h2>
+        <div class="grid2">
+          <div class="card">
+            <b>Owner / Supervisor</b>
+            <p>Dashboard tổng, export báo cáo, quản lý tables/agents, xem audit log.</p>
+          </div>
+          <div class="card">
+            <b>Agent</b>
+            <p>Theo dõi player/session, đối soát rake theo bàn, ghi chú & kiểm tra trạng thái.</p>
+          </div>
+          <div class="card">
+            <b>Dealer</b>
+            <p>Nhập liệu nhanh (rake, seat status), UI tối ưu thao tác 1 tay.</p>
+          </div>
+          <div class="card">
+            <b>Player</b>
+            <p>Chỉ xem thông tin liên quan (nếu có), hạn chế quyền sửa để tránh sai số.</p>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 id="setup">3) Checklist triển khai</h2>
+        <div class="callout">
+          <b>✅ Checklist:</b><br/>
+          • Tạo club + tables + mapping table_uid/table_name<br/>
+          • Tạo agents + PIN + role<br/>
+          • Bật policy phân quyền (RLS nếu dùng Supabase) + validate input<br/>
+          • Thiết lập logging/audit cho các hành động quan trọng<br/>
+          • Test flow: login → create session → add rake → export report
+        </div>
+
+        <h3>Ví dụ cấu hình ENV (gợi ý)</h3>
+        <pre><code># STAGING
+APP_ENV=staging
+API_BASE=https://staging-api.rivebase.local
+REALTIME_CHANNEL=rcs_staging
+
+# PROD
+APP_ENV=prod
+API_BASE=https://api.rivebase.local
+REALTIME_CHANNEL=rcs_prod
+</code></pre>
+
+        <div class="hr"></div>
+
+        <h2 id="data">4) Quy ước dữ liệu</h2>
+        <p>
+          Quy ước rõ ngay từ đầu sẽ giảm bug realtime và dễ đối soát:
+        </p>
+        <pre><code>club_uid:   "C01"
+table_uid:  "T01"          (không đổi)
+table_name: "VIP-1"        (hiển thị)
+agent_uid:  "AG01"
+player_uid: "P123"
+
+seated_at:  timestamp UTC  (hiển thị sang giờ VN nếu cần)
+session_id: uuid
+</code></pre>
+
+        <div class="callout">
+          <b>Tip:</b> Dữ liệu hiển thị có thể dùng <span class="kbd">table_name</span>, nhưng join/logic nên bám <span class="kbd">table_uid</span> để ổn định.
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 id="realtime">5) Realtime & sự kiện</h2>
+        <p>
+          Thiết kế realtime nên theo “event-based”: insert/update vào bảng events hoặc dùng change feed.
+          Quan trọng: gom listener hợp lý để đỡ bug và đỡ lag.
+        </p>
+        <pre><code>// Pseudocode: subscribe to channel
+subscribe("seats_changes", (payload) =&gt; {
+  // update local state
+  // re-render only necessary parts
+});
+
+// Important:
+1) debounce UI updates
+2) handle reconnect
+3) idempotent updates (cùng event vào 2 lần cũng không sai)
+</code></pre>
+
+        <div class="hr"></div>
+
+        <h2 id="security">6) Security (PROD/STAGING)</h2>
+        <div class="grid2">
+          <div class="card">
+            <b>Pin / Auth</b>
+            <p>PIN chỉ là tối thiểu. Nếu có thể, nâng cấp token/session + rotate key định kỳ.</p>
+          </div>
+          <div class="card">
+            <b>Audit log</b>
+            <p>Mọi hành động “thay đổi tiền/rake” nên log lại: ai, khi nào, trước/sau.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <b>Quy tắc release:</b> STAGING pass checklist → tag version → deploy PROD → theo dõi log 24h đầu.
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 id="ops">7) Quy trình vận hành</h2>
+        <pre><code>Shift start:
+- Dealer login
+- Select table
+- Verify table_name on UI
+- Start session
+
+During shift:
+- Add rake events
+- Note exceptions (seat change, pause, dispute)
+- Agent monitors anomalies
+
+Shift end:
+- Close session
+- Export report
+- Supervisor cross-check
+</code></pre>
+
+        <div class="hr"></div>
+
+        <h2 id="trouble">8) Troubleshooting</h2>
+        <div class="callout">
+          <b>Realtime không nhảy?</b><br/>
+          • Kiểm tra channel đúng môi trường (staging/prod)<br/>
+          • Verify table trigger / publication / permissions<br/>
+          • Đảm bảo update đúng cột theo listener filter (schema/table)
+        </div>
+
+        <div class="callout">
+          <b>UI lag?</b><br/>
+          • Tránh render lại toàn bộ table mỗi event<br/>
+          • Chỉ update row/cell cần thiết<br/>
+          • Throttle update timers (1s là đủ)
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 id="faq">9) FAQ</h2>
+        <div class="qa">
+          <details>
+            <summary>Table_name null thì sao?</summary>
+            <p>Hiển thị fallback: nếu <span class="kbd">table_name</span> null thì show <span class="kbd">table_uid</span> để dealer không nhầm.</p>
+          </details>
+          <details>
+            <summary>Nên lưu thời gian UTC hay giờ VN?</summary>
+            <p>Khuyến nghị lưu UTC để đồng nhất; UI hiển thị giờ VN (+07) khi cần.</p>
+          </details>
+          <details>
+            <summary>Update PROD có sợ gián đoạn?</summary>
+            <p>Dùng STAGING test trước, deploy theo phiên bản, và có kế hoạch rollback (tag release).</p>
+          </details>
+        </div>
+
+        <div class="foot">© <span id="y"></span> Rivebase — Documentation</div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(!el) return;
+        e.preventDefault();
+        el.scrollIntoView({behavior:'smooth', block:'start'});
+        history.replaceState(null, "", id);
+      });
+    });
+
+    // copy link button
+    document.getElementById('copyLinkBtn').addEventListener('click', async ()=>{
+      const hash = location.hash || "#intro";
+      const url = location.origin ? (location.origin + location.pathname + hash) : (location.pathname + hash);
+      try{
+        await navigator.clipboard.writeText(url);
+        alert("Đã copy: " + url);
+      }catch{
+        prompt("Copy link:", url);
+      }
+    });
+  </script>
+</body>
+</html>

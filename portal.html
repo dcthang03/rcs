@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rivebase Portal</title>
+  <meta name="description" content="Rivebase Portal — chọn role để vào hệ thống." />
+
+  <style>
+    :root{
+      --bg:#070A12;
+      --txt:#EAF0FF;
+      --muted: rgba(234,240,255,.70);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --r2: 26px;
+      --max: 980px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--txt);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.33), transparent 55%),
+        radial-gradient(900px 600px at 90% 0%, rgba(34,211,238,.20), transparent 55%),
+        radial-gradient(900px 600px at 70% 120%, rgba(96,165,250,.16), transparent 60%),
+        var(--bg);
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:var(--max); margin:0 auto; padding:18px}
+
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:14px 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      backdrop-filter: blur(12px);
+      position:sticky; top:12px; z-index:10;
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:800}
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.55), transparent 60%),
+        linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,211,238,.85));
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: 0 12px 35px rgba(124,58,237,.22);
+    }
+    .brand small{display:block; font-weight:650; color:var(--muted)}
+    .actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      font-weight:750; font-size:14px;
+      cursor:pointer; user-select:none;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22)}
+    .btn.primary{background:#fff; color:#0A0F1F; border-color: rgba(255,255,255,.30)}
+    .btn.primary:hover{background: rgba(255,255,255,.92)}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--muted);
+      font-size:13px;
+      width:fit-content;
+    }
+    .dot{width:9px;height:9px;border-radius:999px;background:#7CFFB2; box-shadow:0 0 0 6px rgba(124,255,178,.10)}
+
+    .hero{padding:26px 0 12px}
+    h1{
+      margin:14px 0 8px;
+      font-size: 32px;
+      letter-spacing:-.4px;
+      line-height:1.12;
+    }
+    .sub{margin:0; color:var(--muted); line-height:1.65; max-width:70ch; font-size:14.5px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top:16px;
+    }
+    .card{
+      position:relative;
+      overflow:hidden;
+      border-radius: var(--r2);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+      padding:16px;
+      min-height: 210px;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.20);
+      background: rgba(255,255,255,.06);
+    }
+    .card:before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(500px 240px at 20% 10%, rgba(124,58,237,.25), transparent 60%),
+        radial-gradient(500px 260px at 90% 80%, rgba(34,211,238,.18), transparent 60%);
+      pointer-events:none;
+      opacity:.9;
+    }
+    .card > *{position:relative}
+    .roleTop{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: rgba(234,240,255,.86);
+      font-size:13px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .ico{
+      width:42px;height:42px;border-radius:16px;
+      display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-size:18px;
+    }
+    .card h2{margin:12px 0 6px; font-size:18px}
+    .card p{margin:0; color:var(--muted); font-size:14px; line-height:1.6}
+    .list{margin:12px 0 0; padding:0; list-style:none; color:rgba(234,240,255,.80); font-size:13.5px}
+    .list li{margin:6px 0; display:flex; gap:10px; align-items:flex-start}
+    .tick{
+      width:18px;height:18px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(124,255,178,.10);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size:12px; color:#7CFFB2;
+      flex:0 0 auto;
+      margin-top:1px;
+    }
+    .goRow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+    .go{flex:1 1 160px}
+    .go small{display:block; color:var(--muted); font-weight:650; margin-top:4px}
+
+    .foot{
+      margin:18px 0 6px;
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      color:var(--muted); font-size:13px;
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-top:14px;
+    }
+
+    @media (max-width: 880px){
+      .grid{grid-template-columns:1fr}
+      h1{font-size:28px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="brand" href="index.html" aria-label="Rivebase Home">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          Rivebase
+          <small>Realtime Rake Counter System</small>
+        </div>
+      </a>
+      <div class="actions">
+        <span class="pill"><span class="dot"></span> Sync OK</span>
+        <a class="btn" href="docs.html">Docs</a>
+        <a class="btn primary" href="#roles">Choose Role</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="pill">Portal • secure role entry</div>
+      <h1>Chọn role để đăng nhập</h1>
+      <p class="sub">
+        Owner cũng đăng nhập giống Agent. Portal này chỉ làm nhiệm vụ điều hướng đúng flow:
+        <b>Owner → owner-login.html</b> và <b>Agent → agent-login.html</b>.
+      </p>
+    </div>
+
+    <div id="roles" class="grid">
+      <!-- OWNER -->
+      <div class="card" role="region" aria-label="Owner Login">
+        <div class="roleTop">
+          <div class="badge">OWNER / SUPERVISOR</div>
+          <div class="ico">👑</div>
+        </div>
+        <h2>Owner Login</h2>
+        <p>Đăng nhập để vào Owner Panel (dashboard, export, audit, cấu hình).</p>
+
+        <ul class="list">
+          <li><span class="tick">✓</span> Dashboard tổng quan</li>
+          <li><span class="tick">✓</span> Export report / đối soát</li>
+          <li><span class="tick">✓</span> Quản trị tables / agents</li>
+        </ul>
+
+        <div class="goRow">
+          <a class="btn primary go" href="owner-login.html">Go to Owner Login
+            <small>owner-login.html</small>
+          </a>
+          <a class="btn go" href="docs.html#security">Security Guide
+            <small>policy / staging / prod</small>
+          </a>
+        </div>
+      </div>
+
+      <!-- AGENT -->
+      <div class="card" role="region" aria-label="Agent Login">
+        <div class="roleTop">
+          <div class="badge">AGENT</div>
+          <div class="ico">🧭</div>
+        </div>
+        <h2>Agent Login</h2>
+        <p>Đăng nhập để vào Agent Panel (realtime seats, theo dõi session, notes).</p>
+
+        <ul class="list">
+          <li><span class="tick">✓</span> Realtime seat / online-offline</li>
+          <li><span class="tick">✓</span> Note & kiểm tra bất thường</li>
+          <li><span class="tick">✓</span> View theo club / table</li>
+        </ul>
+
+        <div class="goRow">
+          <a class="btn primary go" href="agent-login.html">Go to Agent Login
+            <small>agent-login.html</small>
+          </a>
+          <a class="btn go" href="agent-panel.html">Open Agent Panel
+            <small>agent-panel.html</small>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div>© <span id="y"></span> Rivebase</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="index.html">Home</a>
+        <a href="docs.html">Docs</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

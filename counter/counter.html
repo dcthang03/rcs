@@ -19,6 +19,22 @@ input, textarea, select{
   -webkit-touch-callout: default;
 }
 
+/* ===== THEME (đồng bộ vibe Owner/Agent) ===== */
+:root{
+  --bg:#070A12;
+  --panel:#0B1222;
+  --txt:#EAF0FF;
+
+  --purple1:#7C3AED;
+  --purple2:#5B21B6;
+
+  --cyan1:#22D3EE;
+  --cyan2:#0284C7;
+
+  --green1:#22C55E;
+  --green2:#15803D;
+}
+
 /* ===== GLOBAL LOCK ===== */
 html, body {
   margin: 0;
@@ -27,8 +43,12 @@ html, body {
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: manipulation;
-  background: #0e0e11;
-  color: #fff;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.30), transparent 55%),
+    radial-gradient(900px 600px at 90% 0%, rgba(34,211,238,.18), transparent 55%),
+    radial-gradient(900px 600px at 70% 120%, rgba(96,165,250,.12), transparent 60%),
+    var(--bg);
+  color: var(--txt);
   font-family: system-ui, sans-serif;
 }
 input, button { font-size: 16px; }
@@ -42,10 +62,15 @@ input, button { font-size: 16px; }
 }
 .pin-dot{
   width:16px;height:16px;
-  border:2px solid #444;
+  border:2px solid rgba(255,255,255,.18);
   border-radius:50%;
+  background: rgba(255,255,255,.03);
 }
-.pin-dot.filled{ background:#0a84ff; border-color:#0a84ff; }
+.pin-dot.filled{
+  background: rgba(34,211,238,.95);
+  border-color: rgba(34,211,238,.95);
+  box-shadow: 0 0 0 6px rgba(34,211,238,.10);
+}
 
 .keypad{
   display:grid;
@@ -55,51 +80,33 @@ input, button { font-size: 16px; }
 .keypad button{
   padding:14px;
   font-size:18px;
-  border-radius:10px;
-  border:none;
-  background:#1f2937;
-  color:#fff;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: var(--txt);
+  box-shadow: 0 12px 30px rgba(0,0,0,.25);
 }
-.keypad button:active{ background:#374151; }
-
-/* ===== LOGIN (TABLE) ===== */
-#loginView{
-  position:fixed; inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#0e0e11;
-  z-index:1000;
-}
-#loginBox{
-  width:300px;
-  background:#000;
-  padding:16px;
-  border-radius:14px;
-  text-align:center;
-}
-#loginBox select{
-  width:100%;
-  padding:16px;
-  border-radius:10px;
-  border:none;
-  margin-bottom:10px;
-  font-size:16px;
+.keypad button:active{
+  transform: translateY(1px);
+  background: rgba(255,255,255,.09);
 }
 
 /* ===== PANEL ===== */
-#panelView{ display:none; width:100%; height:100%; }
+#panelView{ display:block; width:100%; height:100%; }
 
 /* ===== layout ===== */
 .app{ display:flex; flex-direction:column; height:100dvh; }
 .control-panel{
   flex:3;
-  background:#111;
-  color:white;
-  padding:16px;
-  border-top:3px solid #222;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03)),
+    rgba(10,15,31,.45);
+  color: var(--txt);
+  padding:14px 16px 16px;
+  border-top:1px solid rgba(255,255,255,.10);
   border-radius:18px 18px 0 0;
   box-shadow:0 -8px 30px rgba(0,0,0,.45);
+  backdrop-filter: blur(12px);
 }
 .table-area{
   flex:7;
@@ -115,47 +122,174 @@ input, button { font-size: 16px; }
   gap:22px;
   width:100%;
 }
+
+/* ===== TABLE ===== */
 .table{
   position:relative;
   width:270px;
   height:190px;
   border-radius:200px;
-  background: radial-gradient(circle, #1c1c1c, #0f0f0f 70%);
-  border:4px solid #2a2a2a;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,.10), transparent 45%),
+    radial-gradient(circle at 70% 75%, rgba(34,211,238,.10), transparent 55%),
+    radial-gradient(circle, #0C1222, #070A12 70%);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -18px 40px rgba(0,0,0,.45);
 }
+
+/* ===== CENTER INFO (in table) ===== */
 #tableNameLabel{
-  position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  font-size:22px; font-weight:700; letter-spacing:1px;
-  color:rgba(255,255,255,0.35);
+  
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  pointer-events:none;
+  z-index:10;
+  text-align:center;
+  padding:0 16px;
+}
+
+/* Rivebase mark ở giữa bàn */
+#rivebaseMark{
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.4px;
+  line-height:1.1;
+  background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,211,238,.90));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 14px 40px rgba(0,0,0,.45);
+}
+
+/* Pills cho table/dealer info */
+.center-badges{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  width:100%;
+}
+.center-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  max-width:100%;
+  padding:2px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.2px;
+  color: rgba(234,240,255,.85);
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 35px rgba(0,0,0,.35);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.center-pill.table{
+  background: rgba(124,58,237,.12);
+  border-color: rgba(124,58,237,.22);
+}
+.center-pill.dealer{
+  background: rgba(34,211,238,.12);
+  border-color: rgba(34,211,238,.22);
+}
+
+
+
+/* container overlay */
+#tableNameLabel{
+  position:absolute;
+  inset:0;
   pointer-events:none;
   z-index:10;
 }
 
-/* Dealer button */
-.dealer-btn{
+
+
+/* Rivebase nằm giữa bàn */
+#rivebaseMark{
+  position:absolute;
+  opacity:.55;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.6px;
+  line-height:1.1;
+  transition:.25s;
+  background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,211,238,.90));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 14px 40px rgba(0,0,0,.45);
+}
+
+.table.has-selection #rivebaseMark{
+  opacity:.18;
+  transform:translate(-50%,-50%) scale(.95);
+}
+
+
+/* ===== LOGIN BUTTON ROW ===== */
+.login-row{
+  display:flex;
+  gap:10px;
+  width:min(360px, 92%);
+  transform: translateY(36px);
+}
+.login-row .login-btn{
   position:relative;
   border:none;
   cursor:pointer;
-  margin-top:12px;
-  padding:8px 16px;
-  width:min(360px, 92%);
+  padding:11px 14px;
   border-radius:18px;
   color:#fff;
-  font-weight:800;
+  font-weight:900;
   letter-spacing:.2px;
-  transform: translateY(26px);
   transition: transform .12s ease, filter .12s ease, opacity .12s ease;
   box-shadow:
-    0 14px 30px rgba(0,0,0,0.35),
+    0 18px 45px rgba(0,0,0,0.45),
     inset 0 1px 0 rgba(255,255,255,0.18),
-    inset 0 -10px 20px rgba(0,0,0,0.25);
+    inset 0 -16px 28px rgba(0,0,0,0.25);
+  user-select:none;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.dealer-btn:active{ transform: translateY(28px); filter: brightness(0.98); }
-.dealer-btn.red{ background: linear-gradient(180deg, rgba(239,68,68,0.95), rgba(185,28,28,0.92)); }
-.dealer-btn.green{ background: linear-gradient(180deg, rgba(34,197,94,0.92), rgba(21,128,61,0.90)); }
-.dealer-btn .sub{ display:block; font-size:12px; font-weight:700; opacity:.85; margin-top:4px; }
-.dealer-btn .progressBar{
+.login-row .login-btn:active{ transform: translateY(2px); filter: brightness(0.98); }
+
+/* Default states (đổi hệ màu) */
+.login-row .login-btn.red{
+  background: linear-gradient(180deg, rgba(124,58,237,.95), rgba(91,33,182,.92));
+}
+#dealerBtn.red{
+  background: linear-gradient(180deg, rgba(34,211,238,.95), rgba(2,132,199,.92));
+}
+
+.login-row .login-btn.green{
+  background: linear-gradient(180deg, rgba(34,197,94,.92), rgba(21,128,61,.90));
+}
+
+.login-row .login-btn.gray{
+  background: linear-gradient(180deg, rgba(148,163,184,0.22), rgba(148,163,184,0.10));
+  color: rgba(234,240,255,.75);
+}
+
+.login-row .login-btn .progressBar{
   position:absolute; left:10px; right:10px; bottom:8px;
   height:6px; border-radius:999px;
   background: rgba(255,255,255,0.16);
@@ -163,61 +297,156 @@ input, button { font-size: 16px; }
   opacity:0;
   pointer-events:none;
 }
-.dealer-btn.holding .progressBar{ opacity:1; }
-.dealer-btn .progressFill{
+.login-row .login-btn.holding .progressBar{ opacity:1; }
+.login-row .login-btn .progressFill{
   height:100%; width:0%;
   border-radius:999px;
   background: rgba(255,255,255,0.92);
 }
+
+/* ratio: Table nhỏ hơn, Dealer dài hơn */
+#tableBtn{ flex:2; }
+#dealerBtn{ flex:3; }
 
 /* Seats */
 .seat{
   position:absolute;
   width:60px; height:60px;
   border-radius:50%;
-  background:#1f2937;
-  border:2px solid #374151;
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  font-weight:600;
+  font-weight:800;
   cursor:pointer;
   touch-action:none;
+  box-shadow:
+    0 14px 35px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.08);
 }
-.seat.occupied{ background:#0a84ff; border-color:#0a84ff; }
-.seat small{ font-size:10px; opacity:.9; }
+.seat.occupied{
+  background: linear-gradient(180deg, rgba(34,211,238,.92), rgba(2,132,199,.88));
+  border-color: rgba(34,211,238,.55);
+  box-shadow: 0 18px 45px rgba(34,211,238,.14);
+}
+.seat small{ font-size:10px; opacity:.9; color: rgba(234,240,255,.85); }
 .seat.selected{
-  background:#f59e0b;
-  border-color:#fbbf24;
-  color:#000;
-  box-shadow:0 0 0 3px rgba(245,158,11,.4);
+  background: linear-gradient(180deg, rgba(245,158,11,.95), rgba(217,119,6,.92));
+  border-color: rgba(245,158,11,.65);
+  color:#0A0F1F;
+  box-shadow:0 0 0 3px rgba(245,158,11,.30), 0 22px 55px rgba(0,0,0,.35);
 }
 
-/* slider */
-.slide-container { width:100%; max-width:360px; margin:16px auto; }
-.slide-track { position:relative; height:54px; background:#222; border-radius:30px; overflow:hidden; }
-.slide-text{
-  position:absolute; width:100%; height:100%;
-  color:#aaa; font-size:16px;
-  display:flex; align-items:center; justify-content:center;
+/* ===== SLIDER (3D hơn) ===== */
+.slide-container { width:100%; max-width:360px; margin:16px auto 6px; }
+.slide-track{
+  position:relative;
+  height:56px;
+  border-radius:999px;
+  overflow:hidden;
+
+  background:
+    radial-gradient(120px 60px at 20% 30%, rgba(124,58,237,.18), transparent 65%),
+    radial-gradient(120px 60px at 80% 70%, rgba(34,211,238,.14), transparent 65%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -18px 30px rgba(0,0,0,.35),
+    0 18px 45px rgba(0,0,0,.45);
+}
+.slide-track:after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(90deg, rgba(255,255,255,.10), transparent 35%, rgba(255,255,255,.06));
+  opacity:.35;
   pointer-events:none;
 }
+
+.slide-text{
+  position:absolute; width:100%; height:100%;
+  color: rgba(234,240,255,.65);
+  font-size:15px;
+  font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+  text-shadow: 0 10px 25px rgba(0,0,0,.45);
+}
+
 .slide-thumb{
   position:absolute; top:4px; left:4px;
-  width:46px; height:46px;
-  background:#fff;
+  width:48px; height:48px;
   border-radius:50%;
-  box-shadow:0 2px 8px rgba(0,0,0,0.4);
   cursor:pointer;
   touch-action:none;
-}
-.slide-track.disabled{ opacity:.4; }
 
-/* ===== DEALER MODAL (small like table login) ===== */
-#dealerModal{
+  background:
+    radial-gradient(14px 14px at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.55) 45%, rgba(255,255,255,.20) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.72));
+
+  border:1px solid rgba(255,255,255,.26);
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.85),
+    inset 0 -14px 22px rgba(0,0,0,.12);
+}
+.slide-thumb:after{
+  content:"";
+  position:absolute;
+  inset:10px;
+  border-radius:50%;
+  background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(34,211,238,.18));
+  opacity:.8;
+  pointer-events:none;
+}
+.slide-track.disabled{ opacity:.42; filter: saturate(.9); }
+
+/* ===== Rake buttons (đồng bộ panel) ===== */
+.rake-btn{
+  border:none;
+  padding:10px 14px;
+  border-radius:14px;
+  margin:6px 6px 0;
+  color:#0A0F1F;
+  font-weight:900;
+  cursor:pointer;
+  background:#fff;
+  box-shadow: 0 18px 45px rgba(0,0,0,.35);
+}
+.rake-btn:active{ transform: translateY(1px); }
+.rake-btn:nth-of-type(1){
+  background: linear-gradient(180deg, rgba(34,211,238,.95), rgba(2,132,199,.92));
+  color:#001018;
+}
+.rake-btn:nth-of-type(2){
+  background: linear-gradient(180deg, rgba(124,58,237,.95), rgba(91,33,182,.92));
+  color:#fff;
+}
+.rake-btn:nth-of-type(3){
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+  color:#0A0F1F;
+  border:1px solid rgba(255,255,255,.25);
+}
+
+/* Next Hand button (fallback) */
+#nextHandBtn{
+  border:none;
+  padding:12px 14px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(34,197,94,.92), rgba(21,128,61,.90));
+  color:#03110A;
+  font-weight:900;
+  box-shadow: 0 18px 45px rgba(0,0,0,.35);
+}
+
+/* ===== MODAL ===== */
+.modal{
   position:fixed; inset:0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0,0,0,.60);
   display:none;
   align-items:flex-start;
   justify-content:center;
@@ -225,27 +454,29 @@ input, button { font-size: 16px; }
   padding:16px;
   padding-top:16vh;
 }
-#dealerBox{
+.modal .box{
   width:min(320px, 92%);
-  background:#000;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
   padding:16px;
-  border-radius:14px;
+  border-radius:16px;
   text-align:center;
-  border:1px solid rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.12);
   box-shadow:0 25px 70px rgba(0,0,0,0.55);
+  backdrop-filter: blur(18px);
 }
-#dealerBox .top{
+.modal .top{
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:10px;
 }
-#dealerBox .title{
+.modal .title{
   font-size:16px;
   font-weight:900;
-  color:#e5e7eb;
+  color:rgba(234,240,255,.90);
 }
-#dealerClose{
+.modal .close{
   border:none;
   background:transparent;
   color:#94a3b8;
@@ -254,18 +485,18 @@ input, button { font-size: 16px; }
   border-radius:10px;
   cursor:pointer;
 }
-#dealerClose:active{ background: rgba(255,255,255,0.06); }
-#dealerBox select{
+.modal .close:active{ background: rgba(255,255,255,0.06); }
+.modal select{
   width:100%;
   padding:16px;
-  border-radius:10px;
-  border:none;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
   font-size:16px;
-  background:#111;
-  color:#fff;
+  background: rgba(0,0,0,.35);
+  color: var(--txt);
+  outline:none;
 }
-#dealerHint{ margin-top:8px; font-size:12px; color:#94a3b8; text-align:center; }
-#dealerErr{
+.modal .err{
   display:none;
   margin-top:10px;
   text-align:center;
@@ -273,43 +504,32 @@ input, button { font-size: 16px; }
   color:#fca5a5;
   font-weight:900;
 }
+
+/* ===== QR MODAL ===== */
+#qrModal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+@keyframes tableGlow {
+  0%, 100% { box-shadow: 0 24px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), inset 0 -18px 40px rgba(0,0,0,.45); }
+  50%      { box-shadow: 0 28px 78px rgba(0,0,0,.60), 0 0 0 1px rgba(124,58,237,.10), 0 0 40px rgba(34,211,238,.08), inset 0 1px 0 rgba(255,255,255,.10), inset 0 -18px 40px rgba(0,0,0,.45); }
+}
+.table{
+  animation: tableGlow 5.8s ease-in-out infinite;
+}
+
+
+
 </style>
 </head>
 
 <body>
-
-<!-- ===== LOGIN VIEW (TABLE) ===== -->
-<div id="loginView">
-  <div id="loginBox">
-    <h3 style="margin:0 0 10px">Table Counter</h3>
-
-    <select id="tableSelect">
-      <option value="">-- table select --</option>
-    </select>
-
-    <div class="pin-display" id="tablePinDots">
-      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-    </div>
-
-    <div class="keypad">
-      <button onclick="tablePress(1)">1</button>
-      <button onclick="tablePress(2)">2</button>
-      <button onclick="tablePress(3)">3</button>
-
-      <button onclick="tablePress(4)">4</button>
-      <button onclick="tablePress(5)">5</button>
-      <button onclick="tablePress(6)">6</button>
-
-      <button onclick="tablePress(7)">7</button>
-      <button onclick="tablePress(8)">8</button>
-      <button onclick="tablePress(9)">9</button>
-
-      <button onclick="tableBack()">←</button>
-      <button onclick="tablePress(0)">0</button>
-      <button onclick="submitTableLogin()">OK</button>
-    </div>
-  </div>
-</div>
 
 <!-- ===== PANEL VIEW ===== -->
 <div id="panelView">
@@ -317,22 +537,34 @@ input, button { font-size: 16px; }
     <div class="table-area">
       <div class="table-wrap">
         <div class="table" id="table">
-          <div id="tableNameLabel"></div>
+        <div id="tableNameLabel">
+ 
+
+  <!-- Giữa bàn -->
+  <div id="rivebaseMark">Rivebase</div>
+</div>
+
         </div>
 
-        <button id="dealerBtn" class="dealer-btn red" type="button">
-          Dealer: NOT LOGGED IN
-          <span class="sub">Tap to login • Hold 0.7s to logout</span>
-          <span class="progressBar"><span id="dealerProgress" class="progressFill"></span></span>
-        </button>
+        <!-- 2 buttons row -->
+        <div class="login-row">
+          <button id="tableBtn" class="login-btn red" type="button">
+            <span id="tableBtnText">Table Login</span>
+            <span class="progressBar"><span id="tableProgress" class="progressFill"></span></span>
+          </button>
+
+          <button id="dealerBtn" class="login-btn red" type="button">
+            <span id="dealerBtnText">Dealer Login</span>
+            <span class="progressBar"><span id="dealerProgress" class="progressFill"></span></span>
+          </button>
+        </div>
       </div>
     </div>
 
     <div class="control-panel">
-      <div id="rakePanel" style="text-align:center; margin-top:20px;">
-        <div id="selectedSeat" style="font-size:22px; font-weight:600;">No seat selected</div>
-
-        <div id="rakeAmount" style="font-size:72px; font-weight:800; margin:20px 0;">$0</div>
+      <div id="rakePanel" style="text-align:center; margin-top:14px;">
+        <div id="selectedSeat" style="font-size:22px; font-weight:800; color: rgba(234,240,255,.92);">No seat selected</div>
+        <div id="rakeAmount" style="font-size:72px; font-weight:900; margin:18px 0; letter-spacing:.2px;">$0</div>
 
         <button class="rake-btn" onclick="addRake(1)">+$1</button>
         <button class="rake-btn" onclick="addRake(5)">+$5</button>
@@ -370,12 +602,47 @@ input, button { font-size: 16px; }
   </div>
 </div>
 
-<!-- ===== DEALER MODAL (keypad like table login) ===== -->
-<div id="dealerModal">
-  <div id="dealerBox">
+<!-- TABLE MODAL -->
+<div id="tableModal" class="modal">
+  <div class="box">
+    <div class="top">
+      <div class="title">Table Login</div>
+      <button id="tableClose" class="close" type="button">✕</button>
+    </div>
+
+    <select id="tableSelect">
+      <option value="">Loading…</option>
+    </select>
+
+    <div class="pin-display" id="tablePinDots" style="margin-top:12px">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+
+    <div class="keypad">
+      <button onclick="tablePress(1)">1</button>
+      <button onclick="tablePress(2)">2</button>
+      <button onclick="tablePress(3)">3</button>
+      <button onclick="tablePress(4)">4</button>
+      <button onclick="tablePress(5)">5</button>
+      <button onclick="tablePress(6)">6</button>
+      <button onclick="tablePress(7)">7</button>
+      <button onclick="tablePress(8)">8</button>
+      <button onclick="tablePress(9)">9</button>
+      <button onclick="tableBack()">←</button>
+      <button onclick="tablePress(0)">0</button>
+      <button onclick="submitTableLogin()">OK</button>
+    </div>
+
+    <div id="tableErr" class="err">❌ Wrong PIN</div>
+  </div>
+</div>
+
+<!-- DEALER MODAL -->
+<div id="dealerModal" class="modal">
+  <div class="box">
     <div class="top">
       <div class="title">Dealer Login</div>
-      <button id="dealerClose" type="button">✕</button>
+      <button id="dealerClose" class="close" type="button">✕</button>
     </div>
 
     <select id="dealerSelect">
@@ -390,35 +657,23 @@ input, button { font-size: 16px; }
       <button onclick="dealerPress(1)">1</button>
       <button onclick="dealerPress(2)">2</button>
       <button onclick="dealerPress(3)">3</button>
-
       <button onclick="dealerPress(4)">4</button>
       <button onclick="dealerPress(5)">5</button>
       <button onclick="dealerPress(6)">6</button>
-
       <button onclick="dealerPress(7)">7</button>
       <button onclick="dealerPress(8)">8</button>
       <button onclick="dealerPress(9)">9</button>
-
       <button onclick="dealerBack()">←</button>
       <button onclick="dealerPress(0)">0</button>
       <button onclick="submitDealerLogin()">OK</button>
     </div>
 
-    
-    <div id="dealerErr">❌ Wrong PIN</div>
+    <div id="dealerErr" class="err">❌ Wrong PIN</div>
   </div>
 </div>
 
-<!-- ===== QR MODAL ===== -->
-<div id="qrModal" style="
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.85);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-">
+<!-- QR MODAL -->
+<div id="qrModal">
   <div style="width:260px;background:#000;padding:12px;border-radius:12px">
     <div id="qr-reader" style="width:100%; min-height:240px"></div>
     <button id="closeQR" style="
@@ -455,7 +710,7 @@ const SEAT_SIZE = 60;
 const TABLE_BORDER = 4;
 const SAFE_PADDING = 8;
 
-/* ===== APP STATE ===== */
+/* ===== STATE ===== */
 let rakeTotal = 0;
 let rakeHistory = [];
 let selectedPlayerId = null;
@@ -463,36 +718,42 @@ let selectedSeatNumber = null;
 let isSubmitting = false;
 
 let TABLE_UID = null;
+let TABLE_NAME = null;
 
-/* table login pin */
 let tablePin = "";
 
-/* dealer login */
 let DEALER_UID = null;
 let DEALER_NAME = null;
 let dealerPin = "";
 
-/* seats */
 const seatState = {};
 const seats = {};
 let holdTimer = null;
 let didHold = false;
 
-/* QR */
 let qrScanner = null;
+let seatChannel = null;
 
-/* ===== SUPABASE ===== */
+/* ===== SUPABASE (ANON KEY) ===== */
 const SUPABASE_URL = 'https://ymtmipkmknnsqleahlmi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltdG1pcGtta25uc3FsZWFobG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwOTU1MjUsImV4cCI6MjA4NTY3MTUyNX0.7pEza-TKBKJ_xqdBu93nLo-PRaHDcDIxW-bjZnrFJxw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ===== DOM ===== */
 const tableEl = document.getElementById('table');
+
+const tableBtn = document.getElementById('tableBtn');
+const tableBtnText = document.getElementById('tableBtnText');
+const tableProgress = document.getElementById('tableProgress');
+
 const dealerBtn = document.getElementById('dealerBtn');
+const dealerBtnText = document.getElementById('dealerBtnText');
 const dealerProgress = document.getElementById('dealerProgress');
 
+const tableModal = document.getElementById('tableModal');
+const tableClose = document.getElementById('tableClose');
 const tableSelect = document.getElementById('tableSelect');
-const tableNameLabel = document.getElementById('tableNameLabel');
+const tableErrEl = document.getElementById('tableErr');
 
 const dealerModal = document.getElementById('dealerModal');
 const dealerClose = document.getElementById('dealerClose');
@@ -503,7 +764,8 @@ const thumb = document.getElementById('slideThumb');
 const track = thumb.parentElement;
 
 /* ===== Helpers ===== */
-function isDealerLoggedIn(){ return !!(DEALER_UID && DEALER_NAME); }
+function isTableLoggedIn(){ return !!TABLE_UID; }
+function isDealerLoggedIn(){ return !!DEALER_UID; }
 
 function setDots(containerId, len){
   const wrap = document.getElementById(containerId);
@@ -511,6 +773,69 @@ function setDots(containerId, len){
   wrap.querySelectorAll('.pin-dot').forEach((d,i)=> d.classList.toggle('filled', i < len));
 }
 
+function updateTableCenterInfo(){
+  const t = document.getElementById("tableInfoText");
+  const d = document.getElementById("dealerInfoText");
+  if (!t || !d) return;
+
+    // hiển thị theo kiểu ngắn gọn ở góc trái
+  t.textContent = `Table: ${TABLE_NAME || TABLE_UID || "—"}`;
+  d.textContent = `Dealer: ${DEALER_NAME || DEALER_UID || "—"}`;
+
+  // pills text (ngắn gọn + dễ đọc)
+  t.textContent = `TABLE • ${TABLE_UID || "—"}`;
+  d.textContent = `DEALER • ${DEALER_UID || "—"}`;
+}
+
+function setTableUI(){
+  if (isTableLoggedIn()){
+    tableBtn.classList.remove('red','gray');
+    tableBtn.classList.add('green');
+    tableBtnText.textContent = (TABLE_NAME || TABLE_UID || "Table");
+  }else{
+    tableBtn.classList.remove('green','gray');
+    tableBtn.classList.add('red');
+    tableBtnText.textContent = "Table Login";
+  }
+  updateTableCenterInfo();
+}
+
+function setDealerUI(){
+  if (!isTableLoggedIn()){
+    dealerBtn.classList.remove('green','red');
+    dealerBtn.classList.add('gray');
+    dealerBtnText.textContent = "Table Login";
+    updateTableCenterInfo();
+    return;
+  }
+
+  if (isDealerLoggedIn()){
+    dealerBtn.classList.remove('red','gray');
+    dealerBtn.classList.add('green');
+    dealerBtnText.textContent = (DEALER_NAME || DEALER_UID || "Dealer");
+  }else{
+    dealerBtn.classList.remove('green','gray');
+    dealerBtn.classList.add('red');
+    dealerBtnText.textContent = "Dealer Login";
+  }
+  updateTableCenterInfo();
+}
+
+function requireTable(){
+  if (isTableLoggedIn()) return true;
+  alert("Table login required");
+  openTableModal();
+  return false;
+}
+function requireDealer(){
+  if (!requireTable()) return false;
+  if (isDealerLoggedIn()) return true;
+  alert("Dealer login required");
+  openDealerModal();
+  return false;
+}
+
+/* ===== Display ===== */
 function updateDisplay(){
   const rakeEl = document.getElementById("rakeAmount");
   if (rakeEl) rakeEl.innerText = "$" + (rakeTotal || 0);
@@ -527,47 +852,84 @@ function updateDisplay(){
   }
 }
 
-function setDealerUI(){
-  if (isDealerLoggedIn()){
-    dealerBtn.classList.remove('red');
-    dealerBtn.classList.add('green');
-    dealerBtn.childNodes[0].textContent = `Dealer: ${DEALER_NAME}\n          `;
-  }else{
-    dealerBtn.classList.remove('green');
-    dealerBtn.classList.add('red');
-    dealerBtn.childNodes[0].textContent = `Dealer: NOT LOGGED IN\n          `;
+
+/* kêu tiếng */
+let audioCtx = null;
+
+function playSuccessTone(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  updateDisplay();
+
+  const now = audioCtx.currentTime;
+
+  const osc1 = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc1.type = "sine";
+  osc2.type = "sine";
+
+  osc1.frequency.value = 880;
+  osc2.frequency.value = 1320; // perfect fifth
+
+  gain.gain.value = 0.035;
+
+  osc1.connect(gain);
+  osc2.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc1.start(now);
+  osc2.start(now);
+
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+  osc1.stop(now + 0.09);
+  osc2.stop(now + 0.09);
 }
 
-function requireDealer(){
-  if (isDealerLoggedIn()) return true;
-  alert("Dealer login required");
-  openDealerModal();
-  return false;
-}
 
-/* ===== TABLE LOGIN (keypad) ===== */
+
+
+/* ===== TABLE MODAL ===== */
+function openTableModal(){
+  tableModal.style.display = "flex";
+  resetTableModalUI();
+  loadTablesForModal();
+}
+function closeTableModal(){
+  tableModal.style.display = "none";
+  resetTableModalUI();
+}
+function resetTableModalUI(){
+  tableSelect.value = "";
+  tableSelect.innerHTML = `<option value="">Loading…</option>`;
+  tablePin = "";
+  setDots('tablePinDots', 0);
+  tableErrEl.style.display = "none";
+}
+tableClose.addEventListener('click', closeTableModal);
+tableModal.addEventListener('click', (e) => { if (e.target === tableModal) closeTableModal(); });
+
 function tablePress(n){
+  if (!tableSelect.value){
+    tableErrEl.style.display="block";
+    tableErrEl.textContent="❌ Select table first";
+    return;
+  }
+  tableErrEl.style.display = "none";
   if (tablePin.length >= 4) return;
   tablePin += String(n);
   setDots('tablePinDots', tablePin.length);
-  if (tablePin.length === 4 && tableSelect.value) submitTableLogin();
+  if (tablePin.length === 4) submitTableLogin();
 }
 function tableBack(){
+  tableErrEl.style.display = "none";
   tablePin = tablePin.slice(0,-1);
   setDots('tablePinDots', tablePin.length);
 }
-function resetTablePin(){
-  tablePin = "";
-  setDots('tablePinDots', 0);
-}
 
-tableSelect.addEventListener('change', () => {
-  if (tablePin.length === 4) submitTableLogin();
-});
-
-async function loadTables(){
+async function loadTablesForModal(){
   try{
     const { data, error } = await sb
       .from('tables')
@@ -577,77 +939,78 @@ async function loadTables(){
 
     if (error){
       console.error("loadTables error:", error);
-      alert("Không load được danh sách bàn: " + (error.message || "unknown"));
+      tableSelect.innerHTML = `<option value="">Load failed</option>`;
       return;
     }
 
-    while (tableSelect.options.length > 1) tableSelect.remove(1);
+    const rows = data || [];
+    tableSelect.innerHTML =
+      `<option value="">— Select table —</option>` +
+      rows.map(t => {
+        const name = String((t.table_name||"")).trim();
+        const label = name ? name : String(t.table_uid);
+        return `<option value="${String(t.table_uid)}">${label}</option>`;
+      }).join("");
 
-    (data || []).forEach(row => {
-      const name = (row.table_name || '').trim();
-      const opt = document.createElement('option');
-      opt.value = row.table_uid;
-      opt.textContent = name ? name : row.table_uid;
-      tableSelect.appendChild(opt);
-    });
-
-    if (!data?.length){
-      alert("Không có bàn active=true hoặc bị chặn quyền đọc (RLS).");
+    if (!rows.length){
+      tableSelect.innerHTML = `<option value="">No active tables</option>`;
     }
   }catch(e){
     console.error("loadTables exception:", e);
-    alert("Không load được danh sách bàn (exception). Mở Console xem lỗi.");
+    tableSelect.innerHTML = `<option value="">Load failed</option>`;
   }
 }
 
 async function submitTableLogin(){
   const table = tableSelect.value;
-  if (!table) return alert('Chưa chọn bàn');
-  if (tablePin.length !== 4) return alert('PIN phải đủ 4 số');
+  if (!table) return;
+  if (tablePin.length !== 4) return;
 
   const { data, error } = await sb
     .from('tables')
-    .select('table_uid, pin_hash, active')
+    .select('table_uid, table_name, pin_hash, active')
     .eq('table_uid', table)
     .single();
 
-  if (error || !data){ resetTablePin(); return alert('Bàn không tồn tại'); }
-  if (!data.active){ resetTablePin(); return alert('Bàn đang bị khóa'); }
-  if (data.pin_hash !== tablePin){ resetTablePin(); return alert('Sai PIN'); }
+  if (error || !data){
+    tableErrEl.textContent = "❌ Table not found";
+    tableErrEl.style.display = "block";
+    tablePin = ""; setDots('tablePinDots', 0);
+    return;
+  }
+  if (!data.active){
+    tableErrEl.textContent = "❌ Table locked";
+    tableErrEl.style.display = "block";
+    tablePin = ""; setDots('tablePinDots', 0);
+    return;
+  }
+  if (String(data.pin_hash) !== tablePin){
+    tableErrEl.textContent = "❌ Wrong PIN";
+    tableErrEl.style.display = "block";
+    tablePin = ""; setDots('tablePinDots', 0);
+    return;
+  }
+
+  // đổi bàn => logout dealer để tránh nhầm
+  if (TABLE_UID && TABLE_UID !== data.table_uid){
+    dealerLogout();
+  }
 
   TABLE_UID = data.table_uid;
+  TABLE_NAME = (data.table_name || "").trim() || data.table_uid;
+
   localStorage.setItem("table_uid", TABLE_UID);
+  localStorage.setItem("table_name", TABLE_NAME);
 
-  document.getElementById('loginView').style.display = 'none';
-  document.getElementById('panelView').style.display = 'block';
-
-  const selectedOption = tableSelect.selectedOptions[0];
-  tableNameLabel.innerText = selectedOption?.textContent || TABLE_UID;
-
-  initPanel();
-  resetTablePin();
+  setTableUI();
+  setDealerUI();
+  await startTableSession();
+  closeTableModal();
 }
 
-(function restoreTableLogin(){
-  const saved = localStorage.getItem("table_uid");
-  if (!saved) return;
-
-  TABLE_UID = saved;
-  document.getElementById('loginView').style.display = 'none';
-  document.getElementById('panelView').style.display = 'block';
-  tableNameLabel.innerText = TABLE_UID;
-
-  initPanel();
-
-  // update label to table_name if available after tables loaded
-  setTimeout(() => {
-    const opt = [...tableSelect.options].find(o => o.value === TABLE_UID);
-    if (opt) tableNameLabel.innerText = opt.textContent || TABLE_UID;
-  }, 300);
-})();
-
-/* ===== DEALER MODAL (keypad) ===== */
+/* ===== DEALER MODAL ===== */
 function openDealerModal(){
+  if (!requireTable()) return;
   dealerModal.style.display = "flex";
   resetDealerModalUI();
   loadDealersForModal();
@@ -656,7 +1019,6 @@ function closeDealerModal(){
   dealerModal.style.display = "none";
   resetDealerModalUI();
 }
-
 function resetDealerModalUI(){
   dealerSelect.value = "";
   dealerSelect.innerHTML = `<option value="">Loading…</option>`;
@@ -664,7 +1026,6 @@ function resetDealerModalUI(){
   setDots('dealerPinDots', 0);
   dealerErrEl.style.display = "none";
 }
-
 dealerClose.addEventListener('click', closeDealerModal);
 dealerModal.addEventListener('click', (e) => { if (e.target === dealerModal) closeDealerModal(); });
 
@@ -675,29 +1036,32 @@ async function loadDealersForModal(){
     dealerSelect.innerHTML = `<option value="">Load failed</option>`;
     return;
   }
-
   const rows = data || [];
   if (!rows.length){
     dealerSelect.innerHTML = `<option value="">No dealers</option>`;
     return;
   }
-
   dealerSelect.innerHTML =
     `<option value="">— Select your name —</option>` +
     rows.map(d => `<option value="${String(d.dealer_uid)}">${String(d.dealer_name||"")}</option>`).join("");
 }
 
 function dealerPress(n){
-  if (!dealerSelect.value) { dealerErrEl.style.display="block"; dealerErrEl.textContent="❌ Select dealer first"; return; }
+  if (!requireTable()) return;
+
+  if (!dealerSelect.value) {
+    dealerErrEl.style.display="block";
+    dealerErrEl.textContent="❌ Select dealer first";
+    return;
+  }
   dealerErrEl.style.display = "none";
 
   if (dealerPin.length >= 4) return;
   dealerPin += String(n);
   setDots('dealerPinDots', dealerPin.length);
 
-  if (dealerPin.length === 4) submitDealerLogin(); // auto verify
+  if (dealerPin.length === 4) submitDealerLogin();
 }
-
 function dealerBack(){
   dealerErrEl.style.display = "none";
   dealerPin = dealerPin.slice(0,-1);
@@ -705,6 +1069,7 @@ function dealerBack(){
 }
 
 async function submitDealerLogin(){
+  if (!requireTable()) return;
   if (!dealerSelect.value) return;
   if (dealerPin.length !== 4) return;
 
@@ -740,17 +1105,7 @@ async function submitDealerLogin(){
   }
 }
 
-/* restore dealer */
-(function restoreDealer(){
-  const duid = localStorage.getItem("dealer_uid");
-  const dname = localStorage.getItem("dealer_name");
-  if (duid && dname){
-    DEALER_UID = duid;
-    DEALER_NAME = dname;
-  }
-  setDealerUI();
-})();
-
+/* ===== Logout ===== */
 function dealerLogout(){
   DEALER_UID = null;
   DEALER_NAME = null;
@@ -760,7 +1115,60 @@ function dealerLogout(){
   resetUI();
 }
 
-/* hold logout */
+async function tableLogout(){
+  if (seatChannel){
+    try{ await seatChannel.unsubscribe(); }catch(e){}
+    seatChannel = null;
+  }
+
+  TABLE_UID = null;
+  TABLE_NAME = null;
+  localStorage.removeItem("table_uid");
+  localStorage.removeItem("table_name");
+
+  dealerLogout();
+
+  for (let i=1;i<=SEAT_COUNT;i++){
+    seatState[i] = { player_uid: null };
+  }
+  renderSeats();
+
+  setTableUI();
+  setDealerUI();
+
+  setTimeout(openTableModal, 120);
+}
+
+/* ===== Hold logout (Table + Dealer) ===== */
+let tableHoldTimer = null;
+let tableHoldStart = 0;
+
+function startTableHold(){
+  if (tableHoldTimer) return;
+  tableHoldStart = performance.now();
+  tableBtn.classList.add("holding");
+  tableProgress.style.width = "0%";
+
+  tableHoldTimer = setInterval(() => {
+    const t = performance.now() - tableHoldStart;
+    const pct = Math.min(100, (t / HOLD_TIME) * 100);
+    tableProgress.style.width = pct.toFixed(0) + "%";
+    if (t >= HOLD_TIME) stopTableHold(true);
+  }, 16);
+}
+function stopTableHold(trigger=false){
+  if (tableHoldTimer){
+    clearInterval(tableHoldTimer);
+    tableHoldTimer = null;
+  }
+  tableBtn.classList.remove("holding");
+  tableProgress.style.width = "0%";
+
+  if (trigger && isTableLoggedIn()){
+    if (confirm(`Logout table ${TABLE_UID}?`)) tableLogout();
+  }
+}
+
 let dealerHoldTimer = null;
 let dealerHoldStart = 0;
 
@@ -790,6 +1198,19 @@ function stopDealerHold(trigger=false){
   }
 }
 
+/* bind table btn: ✅ tap KHÔNG cho đổi bàn */
+tableBtn.addEventListener("pointerdown", (e) => {
+  if (e.button !== undefined && e.button !== 0) return;
+  startTableHold();
+});
+tableBtn.addEventListener("pointerup", () => stopTableHold(false));
+tableBtn.addEventListener("pointerleave", () => stopTableHold(false));
+tableBtn.addEventListener("pointercancel", () => stopTableHold(false));
+tableBtn.addEventListener("click", () => {
+  if (!isTableLoggedIn()) openTableModal();
+});
+
+/* bind dealer btn */
 dealerBtn.addEventListener("pointerdown", (e) => {
   if (e.button !== undefined && e.button !== 0) return;
   startDealerHold();
@@ -798,16 +1219,26 @@ dealerBtn.addEventListener("pointerup", () => stopDealerHold(false));
 dealerBtn.addEventListener("pointerleave", () => stopDealerHold(false));
 dealerBtn.addEventListener("pointercancel", () => stopDealerHold(false));
 dealerBtn.addEventListener("click", () => {
+  if (!isTableLoggedIn()) return openTableModal();
   if (!isDealerLoggedIn()) openDealerModal();
 });
 
 /* ===== PANEL / SEATS ===== */
-function initPanel(){
+let panelInited = false;
+
+function initPanelOnce(){
+  if (panelInited) return;
+  panelInited = true;
   createSeats();
   renderSeats();
-  loadSeats();
-  initRealtime();
   window.addEventListener('resize', renderSeats);
+}
+
+async function startTableSession(){
+  initPanelOnce();
+  await loadSeats();
+  await initRealtime();
+  renderSeats();
 }
 
 function createSeats(){
@@ -914,9 +1345,14 @@ document.addEventListener('pointerup', () => {
   if (!isDragging) return;
   isDragging = false;
 
-  if (currentX > maxX() * 0.85) {
+ if (currentX > maxX() * 0.85) {
+
+    playSuccessTone();   // ⭐ thêm dòng này
+
     thumb.style.left = maxX() + 'px';
     document.getElementById('nextHandBtn').click();
+
+
   } else {
     thumb.style.left = '4px';
   }
@@ -934,13 +1370,21 @@ function resetSlider(){
 
 /* ===== DB / Realtime / QR ===== */
 async function loadSeats(){
+  if (!TABLE_UID) return;
   const { data } = await sb.from('seats').select('*').eq('table_uid', TABLE_UID);
   (data||[]).forEach(r => { seatState[String(r.seat_number)].player_uid = r.player_uid; });
   renderSeats();
 }
 
-function initRealtime(){
-  sb.channel('seats-' + TABLE_UID)
+async function initRealtime(){
+  if (!TABLE_UID) return;
+
+  if (seatChannel){
+    try{ await seatChannel.unsubscribe(); }catch(e){}
+    seatChannel = null;
+  }
+
+  seatChannel = sb.channel('seats-' + TABLE_UID)
     .on('postgres_changes',
       { event:'*', schema:'public', table:'seats', filter:`table_uid=eq.${TABLE_UID}` },
       p => {
@@ -1112,9 +1556,44 @@ function resetUI(){
   renderSeats();
 }
 
-/* ===== start ===== */
-loadTables();
-console.log("table-counter clean V2 (dealer keypad)");
+/* ===== restore ===== */
+(async function restoreSessions(){
+  const savedUid = localStorage.getItem("table_uid");
+  const savedName = localStorage.getItem("table_name");
+  if (savedUid){
+    TABLE_UID = savedUid;
+    TABLE_NAME = savedName || savedUid;
+
+    // refresh table_name from DB (để chắc đúng)
+    try{
+      const { data } = await sb.from('tables').select('table_name').eq('table_uid', TABLE_UID).single();
+      const name = (data?.table_name || "").trim();
+      if (name){
+        TABLE_NAME = name;
+        localStorage.setItem("table_name", TABLE_NAME);
+      }
+    }catch(e){}
+
+    const duid = localStorage.getItem("dealer_uid");
+    const dname = localStorage.getItem("dealer_name");
+    if (duid){
+      DEALER_UID = duid;
+      DEALER_NAME = dname || duid;
+    }
+
+    setTableUI();
+    setDealerUI();
+    updateDisplay();
+    await startTableSession();
+  }else{
+    setTableUI();
+    setDealerUI();
+    updateDisplay();
+    setTimeout(openTableModal, 120);
+  }
+})();
+
+console.log("table-counter themed (Rivebase center mark + pills)");
 </script>
 
 </body>

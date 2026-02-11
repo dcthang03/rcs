@@ -11,7 +11,12 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
 body{background:#020617;color:white;min-height:100vh;}
 .main{padding:24px;}
+
+
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+
+
+
 .logout{padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);cursor:pointer;color:#f87171;}
 .logout:hover{background:rgba(248,113,113,0.1);}
 
@@ -96,15 +101,82 @@ body{background:#020617;color:white;min-height:100vh;}
   color:#cbd5e1;
 }
 
+/* ===== RIVEBASE BRAND (topbar) ===== */
+.brandbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0; /* allow truncate */
+}
+
+.rb-logo{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  flex:0 0 auto;
+  background:
+    radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.55), transparent 60%),
+    linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,211,238,.85));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 12px 35px rgba(124,58,237,.18);
+}
+
+.brandtext{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.brandname{
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:.2px;
+  line-height:1.1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.brandtag{
+  font-size:12px;
+  color:#94a3b8;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* keep logout button from shrinking weirdly */
+.topbar > * { min-width: 0; }
+
+@media (max-width:420px){
+  .brandtag{display:none;} /* mobile gọn, không vỡ topbar */
+}
+
+
+
+
+
+
+
 </style>
 </head>
 <body>
 
 <div class="main">
-  <div class="topbar">
-    <h2>Owner Panel</h2>
-    <div class="logout" onclick="logout()">Logout</div>
+ <div class="topbar">
+  <div class="brandbar">
+    <div class="rb-logo" aria-hidden="true"></div>
+    <div class="brandtext">
+      <div class="brandname">Rivebase</div>
+      <div class="brandtag">Realtime Rake Counter System</div>
+    </div>
   </div>
+
+  <div class="logout" onclick="logout()">Logout</div>
+</div>
+
 
   <div class="agent-name" id="ownerName"></div>
 
@@ -147,7 +219,7 @@ body{background:#020617;color:white;min-height:100vh;}
     </table>
   </div>
 
-  <div class="footer">Internal System</div>
+  <div class="footer">© 2026 Rivebase • Internal Operations</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

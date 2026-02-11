@@ -7,14 +7,13 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-<title>Owner Login</title>
+<title>Rivebase — Owner Login</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
 
 /* RESET */
-
 *{
   margin:0;
   padding:0;
@@ -28,7 +27,7 @@ html{
   overflow-x:hidden;
 }
 
-/* BODY — keyboard safe */
+/* ===== BACKGROUND giống INDEX ===== */
 
 body{
 
@@ -40,51 +39,107 @@ body{
 
   padding-top:clamp(90px,14vh,180px);
 
-  color:white;
+  color:#EAF0FF;
 
   background:
-    radial-gradient(circle at 20% 20%, #1e293b 0%, transparent 40%),
-    linear-gradient(135deg,#0f172a,#020617);
+    radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.35), transparent 55%),
+    radial-gradient(900px 600px at 90% 0%, rgba(34,211,238,.22), transparent 55%),
+    radial-gradient(900px 600px at 70% 120%, rgba(96,165,250,.18), transparent 60%),
+    #070A12;
 }
 
-/* CARD */
+
+/* ===== LOGIN CARD ===== */
 
 .login-card{
 
   width:min(380px,90%);
-  padding:40px;
+  padding:44px;
 
-  border-radius:22px;
+  border-radius:26px;
 
-  background:rgba(255,255,255,0.04);
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.07),
+    rgba(255,255,255,.04)
+  );
+
   backdrop-filter: blur(24px);
 
-  border:1px solid rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,.12);
 
-  box-shadow:0 30px 80px rgba(0,0,0,0.9);
+  box-shadow:0 25px 90px rgba(0,0,0,.6);
 }
 
-/* TEXT */
 
-.logo{
-  text-align:center;
+/* ===== RIVEBASE LOGO ===== */
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:28px;
+}
+
+.logo-icon{
+
+  width:54px;
+  height:54px;
+  border-radius:16px;
+
+  background:
+    radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.6), transparent 60%),
+    linear-gradient(135deg, #7C3AED, #22D3EE);
+
+  box-shadow:0 12px 40px rgba(124,58,237,.35);
+  border:1px solid rgba(255,255,255,.25);
+
+  margin-bottom:14px;
+}
+
+.brand-text{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+.brand-name{
   font-size:22px;
-  font-weight:600;
-  margin-bottom:8px;
+  font-weight:700;
+  letter-spacing:.3px;
 }
 
-.uid-dash{
-  color:#475569;
-  margin:0 6px;
-  font-weight:500;
+.tagline{
+  margin-top:2px;
+  font-size:13px;
+  color:rgba(234,240,255,.65);
 }
+
+
+.brand-name{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:.3px;
+}
+
+.tagline{
+  margin-top:4px;
+  font-size:13px;
+  color:rgba(234,240,255,.65);
+}
+
+
+/* ===== SUBTITLE ===== */
 
 .subtitle{
   text-align:center;
-  color:#94a3b8;
+  color:rgba(234,240,255,.65);
   font-size:14px;
-  margin-bottom:28px;
+  margin-bottom:30px;
 }
+
+
+/* INPUT GROUP */
 
 .input-group{
   margin-bottom:18px;
@@ -97,7 +152,8 @@ label{
   margin-bottom:6px;
 }
 
-/* UID PREFIX */
+
+/* UID */
 
 .uid-wrap{
 
@@ -105,33 +161,37 @@ label{
   align-items:center;
 
   background:rgba(15,23,42,0.6);
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.10);
 
   padding-left:12px;
 }
 
 .uid-prefix{
-  color:#94a3b8;
-  font-weight:500;
+  color:#c7d2fe;
+  font-weight:600;
   letter-spacing:1.5px;
-  background:rgba(99,102,241,0.15);
+  background:rgba(99,102,241,0.18);
   padding:4px 8px;
   border-radius:6px;
 }
+
+.uid-dash{
+  color:#64748b;
+  margin:0 6px;
+}
+
 
 /* INPUT */
 
 input{
 
   width:100%;
-  padding:10px 12px;
+  padding:12px 12px;
 
-  font-size:16px; /* stop iOS zoom */
-  line-height:1.25;
-  letter-spacing:0.2px;
-
+  font-size:16px;
   color:#e5e7eb;
+
   background:transparent;
 
   border:none;
@@ -140,56 +200,62 @@ input{
 
 input::placeholder{
   color:#64748b;
-  opacity:1;
 }
 
-input:focus::placeholder{
-  opacity:0.5;
-}
 
-/* PIN needs border */
+/* PIN */
 
 .pin-input{
   background:rgba(15,23,42,0.6);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.10);
+  border-radius:12px;
 }
 
-/* BUTTON */
+
+/* ===== BUTTON (giống index) ===== */
 
 button{
 
   width:100%;
-  padding:13px;
+  padding:14px;
 
-  border-radius:12px;
+  border-radius:14px;
   border:none;
 
-  background:#6366f1;
-  color:white;
+  font-weight:700;
+  letter-spacing:.3px;
 
-  font-weight:600;
   cursor:pointer;
 
-  margin-top:10px;
+  margin-top:12px;
+
+  background:#ffffff;
+  color:#0A0F1F;
+
+  transition:.2s;
 }
 
 button:hover{
-  background:#4f46e5;
+  background:rgba(255,255,255,.92);
+  transform:translateY(-1px);
 }
+
 
 /* ERROR */
 
 .error{
   margin-top:12px;
-  color:#f87171;
+  color:#ff8aa1;
   font-size:13px;
   text-align:center;
   display:none;
 }
 
+
+/* FOOTER */
+
 .footer{
-  margin-top:24px;
+  margin-top:26px;
   text-align:center;
   color:#64748b;
   font-size:12px;
@@ -197,19 +263,28 @@ button:hover{
 
 @media(max-width:420px){
   .login-card{
-    padding:28px;
+    padding:30px;
   }
 }
-
-</style>
+</style
 </head>
 
 <body>
 
 <div class="login-card">
 
-  <div class="logo">Owner Portal</div>
-  <div class="subtitle">Secure access to Owner Panel</div>
+ <div class="brand">
+
+  <div class="logo-icon"></div>
+
+  <div class="brand-text">
+    <div class="brand-name">Rivebase</div>
+    <div class="tagline">Secure Owner Access
+</div>
+  </div>
+
+</div>
+
 
   <!-- UID -->
 
@@ -249,7 +324,7 @@ button:hover{
 
   <div id="error" class="error">Invalid UID or PIN</div>
 
-  <div class="footer">Internal System</div>
+  <div class="footer">© 2026 Rivebase • Internal Operations</div>
 
 </div>
 

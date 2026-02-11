@@ -203,6 +203,53 @@ button:hover{
   }
 }
 
+/* ===== RIVEBASE BRAND (login) — additive, không phá layout ===== */
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:22px;
+}
+
+.logo-icon{
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  flex:0 0 auto;
+  background:
+    radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.6), transparent 60%),
+    linear-gradient(135deg, #7C3AED, #22D3EE);
+  box-shadow:0 12px 40px rgba(124,58,237,.30);
+  border:1px solid rgba(255,255,255,.22);
+}
+
+.brand-text{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:0;
+}
+
+.brand-name{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:.3px;
+  line-height:1.1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.tagline{
+  margin-top:2px;
+  font-size:13px;
+  color:rgba(234,240,255,.65);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+
 </style>
 </head>
 
@@ -210,8 +257,14 @@ button:hover{
 
 <div class="login-card">
 
-  <div class="logo">Agent Portal</div>
-  <div class="subtitle">Secure access to Agent Panel</div>
+  <div class="brand">
+  <div class="logo-icon" aria-hidden="true"></div>
+  <div class="brand-text">
+    <div class="brand-name">Rivebase</div>
+    <div class="tagline">Secure Agent Access</div>
+  </div>
+</div>
+
 
   <!-- UID -->
 
@@ -251,7 +304,7 @@ button:hover{
 
   <div id="error" class="error">Invalid UID or PIN</div>
 
-  <div class="footer">Internal System</div>
+  <div class="footer">© 2026 Rivebase • Internal Operations</div>
 
 </div>
 

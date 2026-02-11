@@ -1,14 +1,636 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rake Counter System</title>
-</head>
-<body style="text-align:center; margin-top:100px;">
-  <h1>Login Panel</h1>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rivebase — Realtime Rake Counter System</title>
+  <meta name="description" content="Rivebase giúp club vận hành Rake Counter realtime: Dealer/Agent/Owner Panel, báo cáo & kiểm soát profit rõ ràng." />
 
-  <a href="./agent/agent-login.html">Agent Panel</a>
-  <a href="./counter/counter.html">Counter Panel</a>
-  
+  <style>
+    :root{
+      --bg:#070A12;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --txt:#EAF0FF;
+      --muted: rgba(234,240,255,.68);
+      --line: rgba(255,255,255,.12);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+      --radius2: 26px;
+      --max: 1120px;
+      --btn:#ffffff;
+      --btnTxt:#0A0F1F;
+      --ok:#7CFFB2;
+      --warn:#FFE08A;
+      --bad:#FF8AA1;
+      --accent1:#7C3AED;
+      --accent2:#22D3EE;
+      --accent3:#60A5FA;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--txt);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.35), transparent 55%),
+        radial-gradient(900px 600px at 90% 0%, rgba(34,211,238,.22), transparent 55%),
+        radial-gradient(900px 600px at 70% 120%, rgba(96,165,250,.18), transparent 60%),
+        var(--bg);
+      overflow-x:hidden;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .container{max-width:var(--max); margin:0 auto; padding:0 18px}
+
+    /* Topbar */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background: linear-gradient(to bottom, rgba(7,10,18,.92), rgba(7,10,18,.60));
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0;
+      gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:700; letter-spacing:.2px;
+    }
+    .logo{
+      width:36px; height:36px; border-radius:12px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.55), transparent 60%),
+        linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,211,238,.85));
+      box-shadow: 0 12px 35px rgba(124,58,237,.22);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .brand small{display:block; font-weight:600; color:var(--muted); letter-spacing:0}
+
+    .navlinks{
+      display:flex; gap:16px; align-items:center;
+    }
+    .navlinks a{
+      font-size:14px; color:var(--muted);
+      padding:8px 10px; border-radius:12px;
+      border:1px solid transparent;
+    }
+    .navlinks a:hover{
+      color:var(--txt);
+      border-color:rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+    }
+
+    .actions{display:flex; gap:10px; align-items:center}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color:var(--txt);
+      font-weight:650;
+      font-size:14px;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.08)}
+    .btn.primary{
+      background: var(--btn);
+      color: var(--btnTxt);
+      border-color: rgba(255,255,255,.30);
+    }
+    .btn.primary:hover{background: rgba(255,255,255,.92)}
+    .btn.ghost{background:transparent}
+
+    /* Hero */
+    .hero{
+      padding:56px 0 10px;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.25fr .95fr;
+      gap:22px;
+      align-items:start;
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      width:fit-content;
+    }
+    .dot{
+      width:9px;height:9px;border-radius:99px;background:var(--ok);
+      box-shadow: 0 0 0 6px rgba(124,255,178,.10);
+    }
+    h1{
+      margin:16px 0 10px;
+      font-size: 44px;
+      line-height:1.06;
+      letter-spacing:-.6px;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.6;
+      max-width:54ch;
+    }
+    .heroCTA{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap}
+    .mini{
+      margin-top:14px;
+      display:flex; gap:14px; flex-wrap:wrap;
+      color:var(--muted); font-size:13px;
+    }
+    .mini span{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .check{
+      width:18px;height:18px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      display:inline-flex; align-items:center; justify-content:center;
+      background: rgba(124,255,178,.10);
+      color: var(--ok);
+      font-weight:900;
+      font-size:12px;
+    }
+
+    /* Card */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+    }
+    .heroCard{
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .heroCard:before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(400px 240px at 70% 20%, rgba(34,211,238,.18), transparent 60%),
+        radial-gradient(420px 260px at 20% 80%, rgba(124,58,237,.18), transparent 60%);
+      pointer-events:none;
+    }
+    .heroCard > *{position:relative}
+    .mockTop{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; padding:10px 12px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      font-size:12.5px;
+      white-space:nowrap;
+    }
+    .status{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(124,255,178,.10);
+      border: 1px solid rgba(124,255,178,.18);
+      color: var(--ok);
+      font-size:12.5px;
+      white-space:nowrap;
+    }
+
+    .mockBody{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .statRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .tile{
+      padding:14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .kpi{font-size:12px;color:var(--muted)}
+    .val{
+      margin-top:6px;
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:-.3px;
+    }
+    .trend{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .bar{
+      margin-top:10px;
+      height:10px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .bar > i{
+      display:block; height:100%;
+      width:68%;
+      background: linear-gradient(90deg, rgba(124,58,237,.9), rgba(34,211,238,.85));
+      border-radius:999px;
+    }
+
+    /* Sections */
+    section{padding:42px 0}
+    .sectionHead{
+      display:flex; align-items:flex-end; justify-content:space-between;
+      gap:16px; margin-bottom:16px;
+    }
+    .sectionHead h2{
+      margin:0;
+      font-size:24px;
+      letter-spacing:-.3px;
+    }
+    .sectionHead p{
+      margin:0; color:var(--muted); max-width:60ch; font-size:14.5px; line-height:1.6;
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+    .feature{
+      padding:16px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      min-height: 150px;
+    }
+    .icon{
+      width:38px;height:38px;border-radius:14px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+    .feature h3{margin:0 0 8px; font-size:16px}
+    .feature p{margin:0; color:var(--muted); font-size:13.8px; line-height:1.6}
+
+    .steps{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    .stepCard{
+      padding:16px;
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .step{
+      display:flex; gap:12px; padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .step:last-child{border-bottom:none}
+    .num{
+      width:28px; height:28px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+      color:rgba(234,240,255,.85);
+      flex:0 0 auto;
+    }
+    .step b{display:block; font-size:14px; margin-bottom:3px}
+    .step span{display:block; font-size:13px; color:var(--muted); line-height:1.55}
+
+    .cta{
+      padding:22px;
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(800px 260px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
+        radial-gradient(700px 260px at 85% 40%, rgba(34,211,238,.18), transparent 55%),
+        rgba(255,255,255,.04);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px;
+    }
+    .cta h3{margin:0 0 6px; font-size:18px}
+    .cta p{margin:0; color:var(--muted); font-size:14px; line-height:1.6; max-width:68ch}
+    footer{
+      padding:26px 0 40px;
+      color:var(--muted);
+      font-size:13px;
+      border-top:1px solid rgba(255,255,255,.08);
+      margin-top:24px;
+    }
+    .foot{
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      align-items:center;
+    }
+    .foot a{color:rgba(234,240,255,.78)}
+    .foot a:hover{color:var(--txt)}
+
+    /* Mobile */
+    .menuBtn{display:none}
+    @media (max-width: 900px){
+      h1{font-size:36px}
+      .heroGrid{grid-template-columns:1fr; gap:14px}
+      .grid3{grid-template-columns:1fr}
+      .steps{grid-template-columns:1fr}
+      .navlinks{display:none}
+      .menuBtn{display:inline-flex}
+      .navlinks.open{
+        display:flex;
+        position:absolute;
+        left:18px; right:18px; top:62px;
+        flex-direction:column;
+        background: rgba(7,10,18,.88);
+        border:1px solid rgba(255,255,255,.12);
+        border-radius: 18px;
+        padding:10px;
+        backdrop-filter: blur(12px);
+      }
+      .navlinks.open a{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="#">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            Rivebase
+            <small>Realtime Rake Counter System</small>
+          </div>
+        </a>
+
+        <div class="navlinks" id="navlinks">
+          <a href="#features">Tính năng</a>
+          <a href="#how">Cách hoạt động</a>
+          <a href="#security">Vận hành & bảo mật</a>
+          <a href="docs.html">Tài liệu kỹ thuật</a>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost menuBtn" id="menuBtn">Menu</button>
+          <a class="btn" href="docs.html">Docs</a>
+          <a class="btn primary" href="#cta">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="container">
+      <div class="heroGrid">
+        <div>
+          <div class="tag"><span class="dot"></span> Live operations — Realtime tracking</div>
+          <h1>Rivebase giúp club vận hành <br/>rake & profit rõ ràng theo thời gian thực.</h1>
+          <p class="sub">
+            Bộ panel cho <b>Owner / Supervisor / Agent / Dealer / Player</b> để ghi nhận, đối soát và báo cáo.
+            Tối ưu cho vận hành nhiều bàn, nhiều session, nhiều club trong ecosystem.
+          </p>
+
+          <div class="heroCTA">
+            <a class="btn primary" href="docs.html">Xem hướng dẫn kỹ thuật</a>
+            <a class="btn" href="#features">Khám phá tính năng</a>
+          </div>
+
+          <div class="mini">
+            <span><i class="check">✓</i> Realtime seat & session</span>
+            <span><i class="check">✓</i> Audit log / đối soát</span>
+            <span><i class="check">✓</i> Mobile-first UI</span>
+          </div>
+        </div>
+
+        <div class="card heroCard" aria-label="Preview panel">
+          <div class="mockTop">
+            <div class="pill">Owner Panel • PROD</div>
+            <div class="status"><span class="dot"></span> Sync OK</div>
+          </div>
+
+          <div class="mockBody">
+            <div class="statRow">
+              <div class="tile">
+                <div class="kpi">Rake Today</div>
+                <div class="val">$ 1,240</div>
+                <div class="trend">+12% vs yesterday</div>
+              </div>
+              <div class="tile">
+                <div class="kpi">Active Tables</div>
+                <div class="val">6</div>
+                <div class="trend">2 tables peak hour</div>
+              </div>
+            </div>
+
+            <div class="tile">
+              <div class="kpi">Realtime health</div>
+              <div class="val">Stable</div>
+              <div class="bar" aria-hidden="true"><i></i></div>
+              <div class="trend">Latency ~ low • Events streaming</div>
+            </div>
+
+            <div class="tile">
+              <div class="kpi">Quick actions</div>
+              <div class="trend">
+                • Create table • Assign dealer • Lock/Unlock session • Export report
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features">
+    <div class="container">
+      <div class="sectionHead">
+        <div>
+          <h2>Tính năng cốt lõi</h2>
+          <p>Thiết kế tập trung vận hành: dễ dùng cho dealer/agent, rõ ràng cho quản lý, dữ liệu chuẩn cho đối soát.</p>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="feature">
+          <div class="icon">⚡</div>
+          <h3>Realtime nhập liệu</h3>
+          <p>Ghi rake theo bàn / theo seat và đồng bộ ngay. Hạn chế sai số, giảm thao tác lặp.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🧾</div>
+          <h3>Audit & đối soát</h3>
+          <p>Log sự kiện, trace thay đổi, export báo cáo theo ngày/tuần/tháng cho club & agent.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🔐</div>
+          <h3>Phân quyền rõ</h3>
+          <p>Owner/Supervisor/Agent/Dealer/Player view tách biệt, giảm rủi ro lộ dữ liệu.</p>
+        </div>
+
+        <div class="feature">
+          <div class="icon">📱</div>
+          <h3>Mobile-first</h3>
+          <p>UI tối ưu iPhone/iPad: thao tác nhanh, chữ rõ, nút lớn cho môi trường live.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🧠</div>
+          <h3>Chuẩn hóa vận hành</h3>
+          <p>Template quy trình ca/kíp, check-list bàn, chuẩn hoá cách ghi để training nhanh.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">📊</div>
+          <h3>Dashboard quản lý</h3>
+          <p>Thấy ngay tình trạng bàn, active session, tổng rake, phân bổ theo agent & club.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="container">
+      <div class="sectionHead">
+        <div>
+          <h2>Cách hoạt động</h2>
+          <p>Flow đơn giản: tạo bàn → login role → nhập rake → báo cáo. Mọi thứ đồng bộ theo thời gian thực.</p>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="stepCard">
+          <div class="step">
+            <div class="num">1</div>
+            <div>
+              <b>Setup club & tables</b>
+              <span>Tạo club, tạo danh sách bàn, cấu hình rake rule / % nếu có.</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <div>
+              <b>Login theo role</b>
+              <span>Dealer nhập liệu, Agent theo dõi, Owner xem tổng quan & đối soát.</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <div>
+              <b>Realtime tracking</b>
+              <span>Ghi theo seat/session, cập nhật trạng thái online/offline, thời lượng ngồi.</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">4</div>
+            <div>
+              <b>Report & export</b>
+              <span>Báo cáo theo ngày/tuần, export để kiểm toán nội bộ.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card cta" id="cta">
+          <div>
+            <h3>Bắt đầu nhanh với tài liệu kỹ thuật</h3>
+            <p>Trang docs có checklist triển khai, quy ước dữ liệu, guideline bảo mật & troubleshooting.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn primary" href="docs.html">Open Docs</a>
+            <a class="btn" href="#security">Security</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="security">
+    <div class="container">
+      <div class="sectionHead">
+        <div>
+          <h2>Vận hành & bảo mật</h2>
+          <p>Ưu tiên: phân quyền, truy vết, và quy trình triển khai an toàn (PROD / STAGING).</p>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="feature">
+          <div class="icon">🧩</div>
+          <h3>Role-based access</h3>
+          <p>Chỉ hiển thị đúng dữ liệu theo vai trò. Giảm rủi ro “xem nhầm, sửa nhầm”.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🛡️</div>
+          <h3>Rule & policy</h3>
+          <p>Khuyến nghị bật policy phía backend (RLS) + validate dữ liệu ở cả client lẫn server.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🧯</div>
+          <h3>Rollback & backup</h3>
+          <p>Luôn có STAGING để test, backup định kỳ, và cách rollback khi update.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="foot">
+        <div>© <span id="y"></span> Rivebase. Built for realtime operations.</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="docs.html">Docs</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // year
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // mobile menu
+    const menuBtn = document.getElementById('menuBtn');
+    const navlinks = document.getElementById('navlinks');
+    if(menuBtn){
+      menuBtn.addEventListener('click', () => navlinks.classList.toggle('open'));
+    }
+
+    // smooth scroll for internal anchors
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(!el) return;
+        e.preventDefault();
+        navlinks.classList.remove('open');
+        el.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+  </script>
 </body>
 </html>
