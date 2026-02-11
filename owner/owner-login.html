@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<title>Owner Login</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+/* RESET */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html{
+  height:100%;
+  overflow-x:hidden;
+}
+
+/* BODY — keyboard safe */
+
+body{
+
+  min-height:100dvh;
+
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+
+  padding-top:clamp(90px,14vh,180px);
+
+  color:white;
+
+  background:
+    radial-gradient(circle at 20% 20%, #1e293b 0%, transparent 40%),
+    linear-gradient(135deg,#0f172a,#020617);
+}
+
+/* CARD */
+
+.login-card{
+
+  width:min(380px,90%);
+  padding:40px;
+
+  border-radius:22px;
+
+  background:rgba(255,255,255,0.04);
+  backdrop-filter: blur(24px);
+
+  border:1px solid rgba(255,255,255,0.06);
+
+  box-shadow:0 30px 80px rgba(0,0,0,0.9);
+}
+
+/* TEXT */
+
+.logo{
+  text-align:center;
+  font-size:22px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+.uid-dash{
+  color:#475569;
+  margin:0 6px;
+  font-weight:500;
+}
+
+.subtitle{
+  text-align:center;
+  color:#94a3b8;
+  font-size:14px;
+  margin-bottom:28px;
+}
+
+.input-group{
+  margin-bottom:18px;
+}
+
+label{
+  display:block;
+  color:#cbd5e1;
+  font-size:13px;
+  margin-bottom:6px;
+}
+
+/* UID PREFIX */
+
+.uid-wrap{
+
+  display:flex;
+  align-items:center;
+
+  background:rgba(15,23,42,0.6);
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.08);
+
+  padding-left:12px;
+}
+
+.uid-prefix{
+  color:#94a3b8;
+  font-weight:500;
+  letter-spacing:1.5px;
+  background:rgba(99,102,241,0.15);
+  padding:4px 8px;
+  border-radius:6px;
+}
+
+/* INPUT */
+
+input{
+
+  width:100%;
+  padding:10px 12px;
+
+  font-size:16px; /* stop iOS zoom */
+  line-height:1.25;
+  letter-spacing:0.2px;
+
+  color:#e5e7eb;
+  background:transparent;
+
+  border:none;
+  outline:none;
+}
+
+input::placeholder{
+  color:#64748b;
+  opacity:1;
+}
+
+input:focus::placeholder{
+  opacity:0.5;
+}
+
+/* PIN needs border */
+
+.pin-input{
+  background:rgba(15,23,42,0.6);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+}
+
+/* BUTTON */
+
+button{
+
+  width:100%;
+  padding:13px;
+
+  border-radius:12px;
+  border:none;
+
+  background:#6366f1;
+  color:white;
+
+  font-weight:600;
+  cursor:pointer;
+
+  margin-top:10px;
+}
+
+button:hover{
+  background:#4f46e5;
+}
+
+/* ERROR */
+
+.error{
+  margin-top:12px;
+  color:#f87171;
+  font-size:13px;
+  text-align:center;
+  display:none;
+}
+
+.footer{
+  margin-top:24px;
+  text-align:center;
+  color:#64748b;
+  font-size:12px;
+}
+
+@media(max-width:420px){
+  .login-card{
+    padding:28px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login-card">
+
+  <div class="logo">Owner Portal</div>
+  <div class="subtitle">Secure access to Owner Panel</div>
+
+  <!-- UID -->
+
+  <div class="input-group">
+    <label>Owner UID</label>
+
+    <div class="uid-wrap">
+      <span class="uid-prefix">AD</span>
+      <span class="uid-dash">-</span>
+
+      <input
+        id="ownerUidInput"
+        placeholder="xx"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        autocomplete="off"
+      >
+    </div>
+  </div>
+
+  <!-- PIN -->
+
+  <div class="input-group">
+    <label>PIN</label>
+
+    <input
+      id="pinInput"
+      class="pin-input"
+      type="password"
+      placeholder="••••"
+      inputmode="numeric"
+      maxlength="4"
+    >
+  </div>
+
+  <button id="loginBtn" onclick="login()">Login</button>
+
+  <div id="error" class="error">Invalid UID or PIN</div>
+
+  <div class="footer">Internal System</div>
+
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+// INIT
+const sb = supabase.createClient(
+  "https://ymtmipkmknnsqleahlmi.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltdG1pcGtta25uc3FsZWFobG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwOTU1MjUsImV4cCI6MjA4NTY3MTUyNX0.7pEza-TKBKJ_xqdBu93nLo-PRaHDcDIxW-bjZnrFJxw"
+);
+
+const ownerUidInput = document.getElementById("ownerUidInput");
+const pinInput = document.getElementById("pinInput");
+const errorDiv = document.getElementById("error");
+const loginBtn = document.getElementById("loginBtn");
+
+// focus
+ownerUidInput.focus();
+
+
+// AUTO SKIP UID → PIN
+ownerUidInput.addEventListener("input", ()=>{
+
+  ownerUidInput.value = ownerUidInput.value.replace(/\D/g,'').slice(0,2);
+
+  if(ownerUidInput.value.length === 2){
+    pinInput.focus();
+  }
+
+});
+
+
+// AUTO LOGIN PIN
+pinInput.addEventListener("input", ()=>{
+
+  pinInput.value = pinInput.value.replace(/\D/g,'').slice(0,4);
+
+  if(pinInput.value.length === 4){
+    login();
+  }
+
+});
+
+
+// LOGIN
+async function login(){
+
+  if(loginBtn.disabled) return;
+
+  errorDiv.style.display = "none";
+
+  const owner_uid = "AD" + ownerUidInput.value.trim();
+  const pin = pinInput.value.trim();
+
+  if(ownerUidInput.value.length !== 2 || pin.length !== 4){
+
+    errorDiv.innerText = "Enter valid UID and PIN";
+    errorDiv.style.display = "block";
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.innerText = "Logging in...";
+
+  // ✅ RPC (khuyến nghị tạo function owner_login giống agent_login)
+  const { data, error } = await sb.rpc("owner_login",{
+    input_uid: owner_uid,
+    input_pin: pin
+  });
+
+  loginBtn.disabled = false;
+  loginBtn.innerText = "Login";
+
+  if(error || !data?.length){
+
+    errorDiv.innerText = "Invalid UID or PIN";
+    errorDiv.style.display = "block";
+
+    pinInput.value="";
+    pinInput.focus();
+
+    return;
+  }
+
+  // ✅ lưu owner uid (giống kiểu agent)
+  localStorage.setItem("owner_uid", data[0].uid);
+
+  window.location.href = "./owner-panel.html";
+}
+
+
+// ENTER
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Enter") login();
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:#020617;color:white;min-height:100vh;}
+.main{padding:24px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.logout{padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);cursor:pointer;color:#f87171;}
+.logout:hover{background:rgba(248,113,113,0.1);}
+
+.agent-name{color:#94a3b8;margin-bottom:14px;}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-bottom:18px;
+}
+.select{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.10);
+  color:#e5e7eb;
+  border-radius:10px;
+  padding:10px 12px;
+  outline:none;
+  min-width:240px;
+}
+.select:focus{border-color:rgba(99,102,241,0.55);}
+
+.footer{margin-top:24px;text-align:center;color:#64748b;font-size:12px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:18px;}
+.card{padding:18px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);}
+.card[data-view]{cursor:pointer;transition:.2s;}
+.card[data-view]:hover{transform:translateY(-4px);}
+.card.active{border:1px solid #4ade80;background:rgba(74,222,128,0.08);}
+.card-title{color:#94a3b8;font-size:13px;}
+.card-value{font-size:24px;font-weight:600;margin-top:6px;}
+
+.section-title{margin-bottom:12px;}
+.table{width:100%;border-collapse:collapse;table-layout: fixed;}
+.table th{text-align:left;padding:12px;color:#94a3b8;border-bottom:1px solid rgba(255,255,255,0.06);overflow:hidden;}
+.table td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,0.04);overflow:hidden;}
+
+.week-note{
+  margin-top:-6px;
+  margin-bottom:18px;
+  font-size:12px;
+  color:#64748b;
+  text-align:right;
+}
+
+.note-view{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  cursor:pointer;
+  padding:6px 8px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:rgba(255,255,255,0.02);
+}
+.note-view:hover{ border-color: rgba(255,255,255,0.14); }
+.note-text{ max-width:220px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.note-edit{ opacity:.8; }
+.note-view:hover .note-edit{ opacity:1; }
+
+.truncate{
+  display:inline-block;
+  max-width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  vertical-align:bottom;
+}
+
+.table td { overflow:hidden; }
+.table-slot.online{ color:#4ade80; font-weight:600; }
+.table-slot.offline{ color:#64748b; }
+
+.badge{
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:12px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.04);
+  color:#cbd5e1;
+}
+
+</style>
+</head>
+<body>
+
+<div class="main">
+  <div class="topbar">
+    <h2>Owner Panel</h2>
+    <div class="logout" onclick="logout()">Logout</div>
+  </div>
+
+  <div class="agent-name" id="ownerName"></div>
+
+  <div class="toolbar">
+    <select id="agentSelect" class="select"></select>
+    <select id="playerSelect" class="select" style="display:none;"></select>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-title" id="playersCardTitle">Total Agents</div>
+      <div class="card-value" id="totalPlayers">--</div>
+    </div>
+
+    <div class="card" data-view="total">
+      <div class="card-title">Total Rake</div>
+      <div class="card-value" id="totalRake">--</div>
+    </div>
+
+    <div class="card active" data-view="this_week">
+      <div class="card-title">This Week</div>
+      <div class="card-value" id="thisWeekRake">--</div>
+    </div>
+
+    <div class="card" data-view="last_week">
+      <div class="card-title">Last Week</div>
+      <div class="card-value" id="lastWeekRake">--</div>
+    </div>
+  </div>
+
+  <div class="week-note">
+    Week starts Monday 00:00 UTC (07:00 AM Vietnam time)
+  </div>
+
+  <div class="section">
+    <div class="section-title" id="tableTitle">Club Overview</div>
+    <table class="table">
+      <thead id="thead"></thead>
+      <tbody id="playersBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">Internal System</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// =====================
+// INIT
+// =====================
+const sb = supabase.createClient(
+  "https://ymtmipkmknnsqleahlmi.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltdG1pcGtta25uc3FsZWFobG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwOTU1MjUsImV4cCI6MjA4NTY3MTUyNX0.7pEza-TKBKJ_xqdBu93nLo-PRaHDcDIxW-bjZnrFJxw"
+);
+
+const owner_uid = localStorage.getItem("owner_uid");
+if(!owner_uid) window.location.href = "./owner-login.html";
+
+// =====================
+// STATE
+// =====================
+let currentView = "this_week"; // total | this_week | last_week
+let ownerAgents = [];          // [{agent_uid, name}]
+let agentUidSet = new Set();   // for realtime filter
+
+let clubPlayers = [];          // all players of owner (merged)
+let currentAgentUid = "ALL";   // "ALL" or agent_uid
+let currentPlayerUid = "ALL";  // "ALL" or player_uid
+
+let serverClockSkewMs = 0;
+let prodRolloverTimer = null;
+
+let playersStateShow = "table"; // for players_state view (only in agent mode)
+let allPlayers = [];            // current table players list when in agent mode
+let allAgentsAgg = [];          // current table agents list when in club mode
+
+// =====================
+// DOM
+// =====================
+const playersBody = document.getElementById("playersBody");
+const totalPlayersEl = document.getElementById("totalPlayers");
+const totalRakeEl = document.getElementById("totalRake");
+const thisWeekRakeEl = document.getElementById("thisWeekRake");
+const lastWeekRakeEl = document.getElementById("lastWeekRake");
+const ownerNameEl = document.getElementById("ownerName");
+const agentSelect = document.getElementById("agentSelect");
+const playerSelect = document.getElementById("playerSelect");
+const thead = document.getElementById("thead");
+const tableTitle = document.getElementById("tableTitle");
+const playersCardTitle = document.getElementById("playersCardTitle");
+
+// Make Total Players clickable -> players_state (only when agent selected)
+document.querySelector("#totalPlayers").closest(".card").setAttribute("data-view","players_state");
+
+// =====================
+// SERVER TIME SYNC
+// =====================
+async function syncServerTime(){
+  const { data, error } = await sb.rpc("get_server_now");
+  if(error){
+    console.error("get_server_now error:", error);
+    serverClockSkewMs = 0;
+    return;
+  }
+  const sNow = new Date(data);
+  const cNow = new Date();
+  serverClockSkewMs = sNow.getTime() - cNow.getTime();
+}
+function getServerNow(){
+  return new Date(Date.now() + serverClockSkewMs);
+}
+
+// =====================
+// WEEK RANGE UTC (PROD)
+// =====================
+async function getWeekRangesUTC(){
+  const { data, error } = await sb.rpc("get_week_ranges_utc");
+  if(error){
+    console.error("get_week_ranges_utc error:", error);
+    return null;
+  }
+  return {
+    utc_now: new Date(data.utc_now),
+    this_start: new Date(data.this_week_start),
+    this_end: new Date(data.this_week_end),
+    last_start: new Date(data.last_week_start),
+    last_end: new Date(data.last_week_end),
+  };
+}
+
+function scheduleWeekRolloverUTC(nextUTCDate){
+  if(prodRolloverTimer) clearTimeout(prodRolloverTimer);
+  const ms = nextUTCDate.getTime() - getServerNow().getTime();
+  prodRolloverTimer = setTimeout(async ()=>{
+    currentView = "this_week";
+    document.querySelectorAll(".card[data-view]").forEach(c=>c.classList.remove("active"));
+    const thisWeekCard = document.querySelector('.card[data-view="this_week"]');
+    if(thisWeekCard) thisWeekCard.classList.add("active");
+    await loadDashboard();
+  }, Math.max(1000, ms + 200));
+}
+
+// =====================
+// FETCH DATA
+// =====================
+async function getOwner(){
+  const { data, error } = await sb
+    .from("owners")
+    .select("owner_uid,owner_name")
+    .eq("owner_uid", owner_uid)
+    .maybeSingle();
+
+  if(error){
+    console.error("getOwner error:", error);
+    return null;
+  }
+  return data;
+}
+
+async function getAgentsByOwner(){
+  const { data, error } = await sb
+    .from("agents")
+    .select("agent_uid,name,owner_uid")
+    .eq("owner_uid", owner_uid)
+    .order("agent_uid", { ascending:true });
+
+  if(error){
+    console.error("getAgentsByOwner error:", error);
+    return [];
+  }
+  return data || [];
+}
+
+async function getPlayersByAgents(agentUids){
+  if(!agentUids?.length) return [];
+  const { data, error } = await sb
+    .from("players")
+    .select("player_uid,total_rake,note,percent_rake,agent_uid")
+    .in("agent_uid", agentUids);
+
+  if(error){
+    console.error("getPlayersByAgents error:", error);
+    return [];
+  }
+  return data || [];
+}
+
+async function getRakeLogsByAgents(agentUids){
+  if(!agentUids?.length) return [];
+  const { data, error } = await sb
+    .from("rake_logs")
+    .select("agent_uid,player_uid,rake,created_at")
+    .in("agent_uid", agentUids);
+
+  if(error){
+    console.error("getRakeLogsByAgents error:", error);
+    return [];
+  }
+  return data || [];
+}
+
+async function getSeatsByPlayers(playerUids){
+  if(!playerUids?.length) return [];
+  const { data, error } = await sb
+    .from("seats")
+    .select("player_uid,table_uid,seat_number,seated_at")
+    .in("player_uid", playerUids)
+    .not("player_uid","is",null);
+
+  if(error){
+    console.error("getSeatsByPlayers error:", error);
+    return [];
+  }
+  return data || [];
+}
+
+// =====================
+// ATTACH WEEKLY RAKE + LAST ACTIVITY
+// =====================
+async function attachWeeklyRakeToPlayers(players, logs, ranges){
+  const r = ranges;
+  if(r){
+    const nextMondayUTC = new Date(r.this_start.getTime() + 7*24*60*60*1000);
+    scheduleWeekRolloverUTC(nextMondayUTC);
+  }
+
+  const thisWeek = r ? { start:r.this_start, end:r.this_end } : null;
+  const lastWeek = r ? { start:r.last_start, end:r.last_end } : null;
+
+  const map = {};
+  players.forEach(p=>{
+    p.this_week = 0;
+    p.last_week = 0;
+    p.last_activity = null;
+    p.last_rake = 0;
+    map[String(p.player_uid)] = p;
+  });
+
+  logs?.forEach(log=>{
+    const player = map[String(log.player_uid)];
+    if(!player) return;
+
+    const date = new Date(log.created_at);
+    const rake = Number(log.rake||0);
+
+    if(thisWeek && date >= thisWeek.start && date <= thisWeek.end) player.this_week += rake;
+    if(lastWeek && date >= lastWeek.start && date <= lastWeek.end) player.last_week += rake;
+
+    if(!player.last_activity || date > new Date(player.last_activity)){
+      player.last_activity = log.created_at;
+      player.last_rake = rake;
+    }
+  });
+
+  return players;
+}
+
+// =====================
+// ATTACH ONLINE STATE (agent mode only)
+// =====================
+function attachPlayerStateFromSeats(players, seats){
+  const seatMap = {};
+  seats?.forEach(seat=>{
+    if(seat.player_uid){
+      const uid = String(seat.player_uid);
+      seatMap[uid] = {
+        table: `${seat.table_uid}-${seat.seat_number}`,
+        seated_at: seat.seated_at
+      };
+    }
+  });
+
+  players.forEach(p=>{
+    const seatData = seatMap[String(p.player_uid)];
+    p.is_online = Boolean(seatData);
+    p.table_position = seatData?.table || "-";
+    p.seated_at = seatData?.seated_at || null;
+  });
+
+  return players;
+}
+
+// =====================
+// UI HELPERS
+// =====================
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+function escapeAttr(str){
+  return escapeHtml(str).replace(/"/g,"&quot;");
+}
+
+function formatLastActivity(player){
+  if(!player.last_activity) return "-";
+  const diffMin = (Date.now() - new Date(player.last_activity)) / 60000;
+  if(diffMin >= 120) return "-";
+
+  const amount = `+$${Number(player.last_rake||0).toLocaleString()}`;
+  const time = new Date(player.last_activity).toLocaleTimeString('en-GB', {
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+
+  return `${amount} ${time}`;
+}
+
+function formatDuration(seatedAt){
+  if(!seatedAt) return "-";
+  const diff = (Date.now() - new Date(seatedAt)) / 60000;
+
+  let color = "#4ade80";
+  if(diff > 60) color = "#fbbf24";
+  if(diff > 120) color = "#f87171";
+
+  const h = Math.floor(diff / 60);
+  const m = Math.floor(diff % 60);
+  return `<span style="color:${color}">${h}h ${m}m</span>`;
+}
+
+function updatePlayersStateTableCell(){
+  if(currentView !== "players_state") return;
+  document.querySelectorAll("tbody tr").forEach(row=>{
+    const uid = row.dataset.uid;
+    const player = allPlayers.find(p => String(p.player_uid) === String(uid));
+    if(!player) return;
+
+    const slot = row.querySelector(".table-slot");
+    if(!slot) return;
+
+    if(!player.is_online){
+      slot.classList.remove("online");
+      slot.classList.add("offline");
+      slot.innerHTML = "-";
+      return;
+    }
+
+    if(playersStateShow === "duration"){
+      slot.classList.add("online");
+      slot.classList.remove("offline");
+      slot.innerHTML = formatDuration(player.seated_at);
+    }else{
+      slot.classList.add("online");
+      slot.classList.remove("offline");
+      slot.textContent = player.table_position || "-";
+    }
+  });
+}
+
+// update duration mượt
+setInterval(()=> {
+  if(currentView === "players_state" && playersStateShow === "duration"){
+    updatePlayersStateTableCell();
+  }
+}, 1000);
+
+// toggle table/duration
+setInterval(()=> {
+  if(currentView !== "players_state") return;
+  playersStateShow = (playersStateShow === "table") ? "duration" : "table";
+  updatePlayersStateTableCell();
+}, 5000);
+
+// =====================
+// RENDER
+// =====================
+function renderClubTable(){
+  // club mode: table shows agents
+  const metricText =
+    currentView === "total" ? "Total Rake" :
+    currentView === "this_week" ? "This Week" :
+    "Last Week";
+
+  thead.innerHTML = `
+    <tr>
+      <th style="width:40%;">Agent</th>
+      <th style="width:20%;">Players</th>
+      <th style="width:40%;">${metricText}</th>
+    </tr>
+  `;
+
+  const sorted = [...allAgentsAgg].sort((a,b)=>{
+    const av =
+      currentView === "total" ? (a.total_rake||0) :
+      currentView === "this_week" ? (a.this_week||0) :
+      (a.last_week||0);
+
+    const bv =
+      currentView === "total" ? (b.total_rake||0) :
+      currentView === "this_week" ? (b.this_week||0) :
+      (b.last_week||0);
+
+    return bv - av;
+  });
+
+  playersBody.innerHTML = sorted.map(a=>{
+    const v =
+      currentView === "total" ? (a.total_rake||0) :
+      currentView === "this_week" ? (a.this_week||0) :
+      (a.last_week||0);
+
+    return `
+      <tr onclick="selectAgentFromRow('${a.agent_uid}')" style="cursor:pointer;">
+       <td>
+  <div style="font-weight:400">
+    ${a.agent_uid} - ${escapeHtml(a.name || "")}
+  </div>
+</td>
+
+        <td>${a.player_count || 0}</td>
+        <td style="font-weight:600;color:#4ade80;">
+          $${Number(v||0).toLocaleString()}
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderAgentTable(){
+  // agent mode: table shows players (same UX as agent panel)
+  if(currentView === "players_state"){
+    thead.innerHTML = `
+      <tr>
+        <th style="width:35%;">Player</th>
+        <th style="width:25%;">Table</th>
+        <th style="width:40%;">Note</th>
+      </tr>
+    `;
+
+    const sortedPlayers = [...allPlayers].sort((a,b)=> b.is_online - a.is_online);
+
+    playersBody.innerHTML = sortedPlayers.map(p=>`
+      <tr data-uid="${p.player_uid}">
+        <td>
+          <span style="font-weight:600">${p.player_uid}</span>
+          ${p.is_online ? ` <span style="color:#4ade80;">●</span>` : ` <span style="color:#64748b;">●</span>`}
+        </td>
+        <td>
+          <span class="table-slot ${p.is_online ? 'online' : 'offline'}">
+            ${p.table_position === "-" ? "-" : p.table_position}
+          </span>
+        </td>
+        <td>
+          <span class="truncate" style="color:#94a3b8;max-width:100%;display:inline-block;">
+            ${(p.note||"").trim() ? escapeHtml(p.note) : "-"}
+          </span>
+        </td>
+      </tr>
+    `).join("");
+
+    updatePlayersStateTableCell();
+    return;
+  }
+
+  const metricText =
+    currentView === "total" ? "Total Rake" :
+    currentView === "this_week" ? "This Week" :
+    "Last Week";
+
+const isLastWeek = currentView === "last_week";
+
+if(isLastWeek){
+  thead.innerHTML = `
+    <tr>
+      <th style="width:60%;">Player</th>
+      <th style="width:40%;">Last Week</th>
+    </tr>
+  `;
+} else {
+  thead.innerHTML = `
+    <tr>
+      <th style="width:30%;">Player</th>
+      <th style="width:15%;">${metricText}</th>
+      <th style="width:55%;">Record</th>
+    </tr>
+  `;
+}
+
+
+  const sorted = [...allPlayers].sort((a,b)=>{
+    if(currentView === "total") return (b.total_rake||0)-(a.total_rake||0);
+    if(currentView === "this_week") return (b.this_week||0)-(a.this_week||0);
+    return (b.last_week||0)-(a.last_week||0);
+  });
+
+  playersBody.innerHTML = sorted.map(p=>{
+  const value =
+    currentView === "total" ? p.total_rake :
+    currentView === "this_week" ? p.this_week :
+    p.last_week;
+
+  const isLive = p.last_activity && (Date.now() - new Date(p.last_activity)) < 5000;
+
+  if(isLastWeek){
+    return `
+      <tr style="${isLive ? 'background:rgba(74,222,128,0.18);transition:.3s;' : ''}">
+        <td>
+          <span style="font-weight:600">${p.player_uid}</span>
+          ${(p.note||"").trim() ? ` <span class="truncate" style="color:#94a3b8; max-width:65%;">(${escapeHtml(p.note)})</span>` : ""}
+        </td>
+        <td style="font-weight:600;color:#4ade80;">
+          $${Number(value||0).toLocaleString()}
+        </td>
+      </tr>
+    `;
+  }
+
+  // total / this_week giữ Record như cũ
+  return `
+    <tr style="${isLive ? 'background:rgba(74,222,128,0.18);transition:.3s;' : ''}">
+      <td>
+        <span style="font-weight:600">${p.player_uid}</span>
+        ${(p.note||"").trim() ? ` <span class="truncate" style="color:#94a3b8; max-width:65%;">(${escapeHtml(p.note)})</span>` : ""}
+      </td>
+
+      <td>$${Number(value||0).toLocaleString()}</td>
+
+      <td style="color:#4ade80;font-weight:600;">
+        <span class="truncate" style="max-width:100%; display:inline-block;">
+          ${formatLastActivity(p)}
+        </span>
+      </td>
+    </tr>
+  `;
+}).join("");
+
+}
+
+function renderTable(){
+  if(currentAgentUid === "ALL"){
+    renderClubTable();
+  }else{
+    renderAgentTable();
+  }
+}
+
+// allow row click in club table
+window.selectAgentFromRow = function(agent_uid){
+  agentSelect.value = agent_uid;
+  agentSelect.dispatchEvent(new Event("change"));
+}
+
+// =====================
+// DROPDOWNS
+// =====================
+function buildAgentSelect(){
+  agentSelect.innerHTML = `
+    <option value="ALL">All Agents (Club Total)</option>
+    ${ownerAgents.map(a=>`<option value="${a.agent_uid}">${a.agent_uid} — ${escapeHtml(a.name||"")}</option>`).join("")}
+  `;
+  agentSelect.value = currentAgentUid;
+}
+
+function buildPlayerSelect(players){
+  // show only in agent mode
+  if(currentAgentUid === "ALL"){
+    playerSelect.style.display = "none";
+    return;
+  }
+
+  playerSelect.style.display = "block";
+  const list = [...players].sort((a,b)=> String(a.player_uid).localeCompare(String(b.player_uid)));
+  playerSelect.innerHTML = `
+    <option value="ALL">All Players</option>
+    ${list.map(p=>`<option value="${p.player_uid}">${p.player_uid}${(p.note||"").trim() ? " — "+escapeHtml(p.note) : ""}</option>`).join("")}
+  `;
+  playerSelect.value = currentPlayerUid;
+}
+
+agentSelect.addEventListener("change", async ()=>{
+  currentAgentUid = agentSelect.value;
+  currentPlayerUid = "ALL";
+
+  if(currentAgentUid === "ALL"){
+    if(currentView === "players_state") currentView = "this_week";
+    playersCardTitle.innerText = "Total Agents";
+    tableTitle.innerText = "Agents List";
+  }else{
+    playersCardTitle.innerText = "Total Players";
+    tableTitle.innerText = "Agent Players";
+  }
+
+  await loadDashboard();
+});
+
+
+playerSelect.addEventListener("change", async ()=>{
+  currentPlayerUid = playerSelect.value;
+  await loadDashboard();
+});
+
+// =====================
+// CARDS CLICK
+// =====================
+document.querySelectorAll(".card[data-view]").forEach(card=>{
+  card.addEventListener("click",()=>{
+    // players_state only makes sense in agent mode
+    if(card.dataset.view === "players_state" && currentAgentUid === "ALL") return;
+
+    document.querySelectorAll(".card[data-view]").forEach(c=>c.classList.remove("active"));
+    card.classList.add("active");
+
+    currentView = card.dataset.view;
+    renderTable();
+  });
+});
+
+// =====================
+// DASHBOARD LOADER
+// =====================
+async function loadDashboard(){
+  await syncServerTime();
+
+  const ranges = await getWeekRangesUTC();
+
+  // ✅ ALWAYS set header/title by current mode (fix initial load)
+if(currentAgentUid === "ALL"){
+  playersCardTitle.innerText = "Total Agents";
+  tableTitle.innerText = "Agents List";
+}else{
+  playersCardTitle.innerText = "Total Players";
+  tableTitle.innerText = "Agent Players";
+}
+
+
+
+  // get owner + agents once if empty
+  if(!ownerAgents.length){
+    const owner = await getOwner();
+    ownerNameEl.innerText = `Owner: ${owner?.owner_name || owner_uid}`;
+
+    ownerAgents = await getAgentsByOwner();
+    agentUidSet = new Set(ownerAgents.map(a=>a.agent_uid));
+    buildAgentSelect();
+  }
+
+  // Club mode (ALL)
+  if(currentAgentUid === "ALL"){
+    playerSelect.style.display = "none";
+
+    const agentUids = ownerAgents.map(a=>a.agent_uid);
+    const players = await getPlayersByAgents(agentUids);
+    const logs = await getRakeLogsByAgents(agentUids);
+
+    clubPlayers = players;
+
+    // attach weekly stats to all players (for aggregation)
+    await attachWeeklyRakeToPlayers(players, logs, ranges);
+
+    const seats = await getSeatsByPlayers(players.map(p=>p.player_uid));
+attachPlayerStateFromSeats(players, seats);
+
+// ✅ ADD HERE
+const onlinePlayers = players.filter(p => p.is_online === true).length;
+
+
+
+    // aggregate by agent
+    const map = {};
+    ownerAgents.forEach(a=>{
+      map[a.agent_uid] = {
+        agent_uid: a.agent_uid,
+        name: a.name,
+        player_count: 0,
+        total_rake: 0,
+        this_week: 0,
+        last_week: 0
+      };
+    });
+
+    players.forEach(p=>{
+      const a = map[p.agent_uid];
+      if(!a) return;
+      a.player_count += 1;
+      a.total_rake += Number(p.total_rake||0);
+      a.this_week += Number(p.this_week||0);
+      a.last_week += Number(p.last_week||0);
+    });
+
+    allAgentsAgg = Object.values(map);
+
+    // cards (club totals)
+    const totalAgents = ownerAgents.length;
+const totalPlayers = players.length;
+
+totalPlayersEl.innerHTML =
+  onlinePlayers > 0
+    ? `${totalAgents} <span style="color:#4ade80">(${onlinePlayers}</span> / ${totalPlayers})`
+    : `${totalAgents} <span style="color:#64748b">(0</span> / ${totalPlayers})`;
+
+
+    const total = allAgentsAgg.reduce((s,a)=>s+(a.total_rake||0),0);
+    const thisWeek = allAgentsAgg.reduce((s,a)=>s+(a.this_week||0),0);
+    const lastWeek = allAgentsAgg.reduce((s,a)=>s+(a.last_week||0),0);
+
+    totalRakeEl.innerText = "$"+total.toLocaleString();
+    thisWeekRakeEl.innerText = "$"+thisWeek.toLocaleString();
+    lastWeekRakeEl.innerText = "$"+lastWeek.toLocaleString();
+
+    renderTable();
+    return;
+  }
+
+  // Agent mode (selected)
+  const agentUids = [currentAgentUid];
+  const players = await getPlayersByAgents(agentUids);
+  const logs = await getRakeLogsByAgents(agentUids);
+
+  await attachWeeklyRakeToPlayers(players, logs, ranges);
+
+  // filter by player if selected
+  let visiblePlayers = players;
+  if(currentPlayerUid !== "ALL"){
+    visiblePlayers = players.filter(p=>String(p.player_uid) === String(currentPlayerUid));
+  }
+
+  // seats only for visible players (online state)
+  const seats = await getSeatsByPlayers(visiblePlayers.map(p=>p.player_uid));
+  attachPlayerStateFromSeats(visiblePlayers, seats);
+
+  allPlayers = visiblePlayers;
+
+  // dropdown players
+  buildPlayerSelect(players);
+
+  // cards
+  const onlineCount = visiblePlayers.filter(p => p.is_online === true).length;
+  totalPlayersEl.innerHTML =
+    visiblePlayers.length
+      ? (onlineCount > 0
+          ? `<span style="color:#4ade80">${onlineCount}</span> / ${visiblePlayers.length}`
+          : `<span style="color:#9ca3af">0</span> / ${visiblePlayers.length}`
+        )
+      : "0";
+
+  const total = visiblePlayers.reduce((s,p)=>s+(p.total_rake||0),0);
+  const thisWeek = visiblePlayers.reduce((s,p)=>s+(p.this_week||0),0);
+  const lastWeek = visiblePlayers.reduce((s,p)=>s+(p.last_week||0),0);
+
+  totalRakeEl.innerText = "$"+total.toLocaleString();
+  thisWeekRakeEl.innerText = "$"+thisWeek.toLocaleString();
+  lastWeekRakeEl.innerText = "$"+lastWeek.toLocaleString();
+
+  // title
+  const a = ownerAgents.find(x=>x.agent_uid === currentAgentUid);
+  tableTitle.innerText = `Agent: ${a?.name || currentAgentUid}`;
+
+  renderTable();
+}
+
+// =====================
+// REALTIME: rake_logs (FILTER by owner agent set)
+// =====================
+sb.channel("owner-rake-live")
+.on(
+  "postgres_changes",
+  { event:"INSERT", schema:"public", table:"rake_logs" },
+  payload=>{
+    const log = payload.new;
+    if(!log?.agent_uid) return;
+    if(!agentUidSet.has(log.agent_uid)) return; // not your owner
+
+    // if viewing club mode, easiest is reload minimal aggregation
+    // but to keep UI snappy, we only update current view when it matches selected agent
+    if(currentAgentUid === "ALL"){
+      // lightweight: bump totals in memory if we already have aggregations
+      // safest (less bug): reload dashboard
+      loadDashboard();
+      return;
+    }
+
+    if(log.agent_uid !== currentAgentUid) return;
+
+    // update visible player (agent mode)
+    const player = allPlayers.find(p => String(p.player_uid) === String(log.player_uid));
+    if(!player) return;
+
+    const rake = Number(log.rake||0);
+    player.this_week = Number(player.this_week||0) + rake;
+    player.total_rake = Number(player.total_rake||0) + rake;
+    player.last_activity = log.created_at;
+    player.last_rake = rake;
+
+    // update cards
+    thisWeekRakeEl.innerText = "$" + allPlayers.reduce((s,p)=>s+(p.this_week||0),0).toLocaleString();
+    totalRakeEl.innerText = "$" + allPlayers.reduce((s,p)=>s+(p.total_rake||0),0).toLocaleString();
+
+    renderTable();
+  }
+)
+.subscribe();
+
+// =====================
+// REALTIME: seats (only matters in agent mode)
+// =====================
+sb.channel("owner-seats-live")
+.on(
+  "postgres_changes",
+  { event:"*", schema:"public", table:"seats" },
+  payload=>{
+    if(currentAgentUid === "ALL") return; // not showing online in club mode
+    const uid = payload.new?.player_uid || payload.old?.player_uid;
+    if(!uid) return;
+
+    // refresh only if visible list contains that player
+    const exists = allPlayers.find(p=>String(p.player_uid)===String(uid));
+    if(!exists) return;
+
+    // simplest safe refresh
+    loadDashboard();
+  }
+)
+.subscribe();
+
+// =====================
+// LOGOUT
+// =====================
+function logout(){
+  localStorage.removeItem("owner_uid");
+  window.location.href = "./owner-login.html";
+}
+
+// =====================
+// START
+// =====================
+(async ()=>{
+  await loadDashboard();
+})();
+
+// refresh summary each minute
+setInterval(()=> {
+  if(currentView !== "players_state") renderTable();
+}, 60000);
+
+</script>
+
+</body>
+</html>
